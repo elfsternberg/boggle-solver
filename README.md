@@ -66,8 +66,8 @@ non-existent.  Sorry about that.
 - [The North American Scrabble™ word list](https://www.wordgamedictionary.com/twl06/download/twl06.txt)
 - [The European Scrabble™ list of English words](https://www.wordgamedictionary.com/sowpods/download/sowpods.txt)
 
-The file `twl06.txt.xz` included in the project root is an unofficial
-copy of the North American Scrabble™ word list.
+The file `twl06.txt.xz` included in the project root is a
+copy of the unofficial North American Scrabble™ word list.
 
 ## ToDo
 
