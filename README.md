@@ -39,11 +39,12 @@ specified.
 The format for a board file is straightforward.  It's a text file,
 with the letters per row, like so:
 
-`arni
+```
+arni
 wier
 oaer
 hrpd
-`
+```
 
 The parser can handle any amount of whitespace between the letters, and
 will ignore blank rows after the data.  Those were common sources of
