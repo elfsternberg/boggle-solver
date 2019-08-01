@@ -48,7 +48,7 @@ pub fn main() {
                                         .map(|i| i.chars().next().unwrap())
                                         .collect();
                     match found {
-                        Some(c) => if c != v.len() {
+                        Some(c) => if !v.is_empty() && c != v.len() {
                             writeln!(std::io::stderr(), "Boggle board rows must all be the same length").unwrap();
                             std::process::exit(1);
                         },
@@ -56,8 +56,9 @@ pub fn main() {
                             found = Some(v.len());
                         }
                     };
-
-                    board.push(v);
+                    if !v.is_empty() {
+                        board.push(v);
+                    }
                 }
                 Err(_) => {
                     writeln!(std::io::stderr(), "Could not parse boggle board file").unwrap();

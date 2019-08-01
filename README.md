@@ -27,17 +27,43 @@ implemented more or less the way Wikipedia explains it, and its ability
 to distinguish between a whole word and a prefix is nicely clever, I
 think.
 
+## The Binary
+
+A standalone binary is generated during the build.  Basic usage is:
+
+`boggle [-d <path to dictionary>] <board_file>`
+
+The program defaults to /usr/share/dict/words if no dictionary is
+specified. 
+
+The format for a board file is straightforward.  It's a text file,
+with the letters per row, like so:
+
+'''arni
+wier
+oaer
+hrpd
+'''
+
+The parser can handle any amount of whitespace between the letters, and
+will ignore blank rows after the data.  Those were common sources of
+crashiness.  The parser will complain if the rows are not all of the
+same length.
+
 ## Caveats:
 
 The expected dictionary is the one found in /usr/share/dict/words on GNU
 installations, known as the "GNU common words dictionary."  Your tests
 may not pass if you use a bigger dictionary or if that path is
-non-existent..  Sorry about that.
+non-existent.  Sorry about that.
 
 ## Useful links:
 
 - [The North American Scrabble™ word list](https://www.wordgamedictionary.com/twl06/download/twl06.txt)
 - [The European Scrabble™ list of English words](https://www.wordgamedictionary.com/sowpods/download/sowpods.txt)
+
+The file "twl06.txt.xz" included in the project root is an unofficial
+copy of the North American Scrabble™ word list.
 
 ## ToDo
 
