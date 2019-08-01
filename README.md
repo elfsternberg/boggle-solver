@@ -47,7 +47,7 @@ hrpd
 ```
 
 A copy of this particular example can be found in the `sample_board.txt`
-file in the project root directory.
+file in the project root directory
 
 The parser can handle any amount of whitespace between the letters, and
 will ignore blank rows after the data.  Those were common sources of
@@ -66,7 +66,7 @@ non-existent.  Sorry about that.
 - [The North American Scrabble™ word list](https://www.wordgamedictionary.com/twl06/download/twl06.txt)
 - [The European Scrabble™ list of English words](https://www.wordgamedictionary.com/sowpods/download/sowpods.txt)
 
-The file "twl06.txt.xz" included in the project root is an unofficial
+The file `twl06.txt.xz` included in the project root is an unofficial
 copy of the North American Scrabble™ word list.
 
 ## ToDo
