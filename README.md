@@ -41,16 +41,11 @@ non-existent..  Sorry about that.
 
 ## ToDo
 
-The binary is ridiculously primitive.  Here's the love it needs:
+The binary is <s>ridiculously</s> now slightly less primitive.  Here's
+the love it still needs:
 
-- The parser should detect boards with bad dimensions (n⨯m is fine, but
-  rows of different lengths is not!)
-- The parser should accept arbitrary whitespace and no whitespace as options
 - The parser should forbid non-alphabet and mixed-alphabet inputs
-- The parser should be clear about what couldn't be parsed
 - The parser should take STDIN as an option
-- The solver should include an option for a different dictionary on the
-  command line
 
 I would be tempted to do a Haskell version, but there's a *lot* of
 mutation in this.  I need to think harder, and practice more Haskell,

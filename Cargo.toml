@@ -5,6 +5,8 @@ authors = ["Elf M. Sternberg <elf.sternberg@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+clap = "2.33.0"
+regex = "1"
 
 [lib]
 name = "boggle_solver"

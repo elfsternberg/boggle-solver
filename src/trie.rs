@@ -62,7 +62,7 @@ mod tests {
 
     #[test]
     fn test_tries() {
-        let trie = dict();
+        let trie = dict("/usr/share/dict/words");
         assert!(trie.find(&mut "question".to_string().chars()));
         assert!(trie.find(&mut "zigzag".to_string().chars()));
         assert!(!trie.find(&mut "felgercarb".to_string().chars()));

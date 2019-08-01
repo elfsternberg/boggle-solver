@@ -96,7 +96,7 @@ mod tests {
 
     #[test]
     fn sample_board() {
-        let trie = dict();
+        let trie = dict("/usr/share/dict/words");
         let sample = sample_to_vecs(&[&['a', 'n'], &['t', 'd']]);
         let mut expected = result_to_vec(&["ant", "and", "tan", "tad"]);
         let mut board = Board::new(sample, &trie).unwrap();
@@ -108,7 +108,7 @@ mod tests {
 
     #[test]
     fn standard_board() {
-        let trie = dict();
+        let trie = dict("/usr/share/dict/words");
         let sample = sample_to_vecs(&[
             &['m', 'a', 'p', 'o'],
             &['e', 't', 'e', 'r'],
