@@ -1,8 +1,8 @@
 use std::fs::File;
 use std::io::{BufRead, BufReader, Write};
 
-use boggle_solver::Board;
 use boggle_solver::dict::dict;
+use boggle_solver::Board;
 
 pub fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -18,7 +18,10 @@ pub fn main() {
         for line in f.lines() {
             match line {
                 Ok(line) => {
-                    let v: Vec<char> = line.split(' ').map(|i| i.to_string().chars().next().unwrap()).collect();
+                    let v: Vec<char> = line
+                        .split(' ')
+                        .map(|i| i.to_string().chars().next().unwrap())
+                        .collect();
                     board.push(v);
                 }
                 Err(_) => {
@@ -28,8 +31,8 @@ pub fn main() {
             }
         }
         board
-    };        
-    
+    };
+
     let trie = dict();
     let mut board = Board::new(board, &trie).unwrap();
     let solutions = board.solve();
@@ -37,6 +40,3 @@ pub fn main() {
         println!("{}", s);
     }
 }
-
-    
-    

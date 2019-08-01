@@ -118,25 +118,19 @@ mod tests {
 
         let mut board = Board::new(sample, &trie).unwrap();
         let mut expected = result_to_vec(&[
-            "map", "mat", "mate", "mated", "mate", "mate", "mated", "mated", "meat", "met", "mete",
-            "meteor", "meteoric", "meter", "mete", "meted", "meted", "meddle", "meet", "apt",
-            "apter", "ape", "ate", "ate", "ate", "pat", "pate", "pate", "pate", "poet", "pore",
-            "porn", "pea", "peat", "pet", "per", "pee", "peed", "peel", "peed", "pen", "pent",
-            "pended", "pro", "preteen", "pretend", "preen", "print", "printed", "printed",
-            "printed", "opt", "opted", "opted", "opted", "open", "opened", "opened", "ore",
-            "orient", "oriented", "oriented", "oriented", "eat", "eater", "eaten", "eaten", "eta",
-            "eel", "tam", "tame", "tamed", "tap", "tape", "taper", "tea", "team", "tee", "teed",
-            "teen", "teenier", "teed", "tea", "team", "teamed", "tern", "tee", "teed", "teen",
-            "teed", "ten", "tend", "tended", "tee", "teem", "teed", "tee", "teen", "ten", "tend",
-            "eat", "eaten", "eta", "eel", "enrich", "enriched", "enriched", "end", "ended", "rope",
-            "roe", "ream", "reamed", "reap", "rep", "reed", "reel", "reed", "rent", "rented",
-            "rented", "rented", "rend", "rein", "reined", "reined", "rind", "rich", "deter",
-            "deed", "deem", "deter", "deep", "deer", "den", "dent", "denier", "eta", "edema",
-            "enter", "enrich", "end", "neat", "net", "need", "need", "need", "net", "niche", "ire",
-            "inter", "inept", "indeed", "inch", "inched", "inched", "lee", "let", "lee", "leer",
-            "led", "lent", "lend", "led", "deem", "deed", "deter", "deep", "deer", "den", "dent",
-            "dented", "denier", "heed", "hen", "held", "held", "hie", "hire", "hint", "hinted",
-            "hinted", "hinted", "hind", "cheep", "cheer", "chi", "chirp", "chin",
+            "ape", "apt", "apter", "ate", "cheep", "cheer", "chi", "chin", "chirp", "deed", "deem",
+            "deep", "deer", "den", "denier", "dent", "dented", "deter", "eat", "eaten", "eater",
+            "edema", "eel", "end", "ended", "enrich", "enriched", "enter", "eta", "heed", "held",
+            "hen", "hie", "hind", "hint", "hinted", "hire", "inch", "inched", "indeed", "inept",
+            "inter", "ire", "led", "lee", "leer", "lend", "lent", "let", "map", "mat", "mate",
+            "mated", "meat", "meddle", "meet", "met", "mete", "meted", "meteor", "meteoric",
+            "meter", "neat", "need", "net", "niche", "open", "opened", "opt", "opted", "ore",
+            "orient", "oriented", "pat", "pate", "pea", "peat", "pee", "peed", "peel", "pen",
+            "pended", "pent", "per", "pet", "poet", "pore", "porn", "preen", "preteen", "pretend",
+            "print", "printed", "pro", "ream", "reamed", "reap", "reed", "reel", "rein", "reined",
+            "rend", "rent", "rented", "rep", "rich", "rind", "roe", "rope", "tam", "tame", "tamed",
+            "tap", "tape", "taper", "tea", "team", "teamed", "tee", "teed", "teem", "teen",
+            "teenier", "ten", "tend", "tended", "tern",
         ]);
         let mut result = board.solve();
         expected.sort();

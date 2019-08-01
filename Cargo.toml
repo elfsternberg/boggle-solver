@@ -10,6 +10,3 @@ edition = "2018"
 name = "boggle_solver"
 path = "src/lib.rs"
 
-[[bin]]
-name = "boggle"
-path = "src/main.rs"
