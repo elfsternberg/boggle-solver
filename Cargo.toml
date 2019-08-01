@@ -1,0 +1,12 @@
+[package]
+name = "boggle-solver"
+version = "0.1.0"
+authors = ["Elf M. Sternberg <elf.sternberg@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+
+[lib]
+name = "boggle_solver"
+path = "src/lib.rs"
+

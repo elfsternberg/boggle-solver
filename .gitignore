@@ -1,0 +1,9 @@
+.#*
+*~
+*#
+*.aux
+Cargo.lock
+*.chi
+*.chs.h
+**/*.rs.bk
+target
