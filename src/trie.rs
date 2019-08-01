@@ -1,10 +1,9 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::rc::Rc;
 
 pub struct Node {
     word: bool,
-    suff: HashMap<char, Rc<RefCell<Node>>>,
+    suff: HashMap<char, Box<RefCell<Node>>>,
 }
 
 impl Node {
@@ -28,7 +27,7 @@ impl Node {
             None => {
                 let mut newtrie = Node::new();
                 newtrie.insert(word);
-                self.suff.insert(c, Rc::new(RefCell::new(newtrie)));
+                self.suff.insert(c, Box::new(RefCell::new(newtrie)));
             }
             Some(node) => {
                 node.borrow_mut().insert(word);

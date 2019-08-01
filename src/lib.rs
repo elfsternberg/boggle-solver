@@ -83,6 +83,8 @@ impl<'a> Board<'a> {
                 self.solveforpos(x, y, &mut possibles)
             }
         }
+        self.solutions.sort();
+        self.solutions.dedup();
         self.solutions.to_vec()
     }
 }
