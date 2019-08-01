@@ -16,7 +16,7 @@ to pull out without a lot of set-up and ceremony.  It was also the
 subject of a recent whiteboarding exercise I did for an interview.  I
 believe I did okay in the interview, but it wasn't until I got home that
 it hit me: dammit, the correct data structure for finding words is a
-[trie!](https://en.wikipedia.org/wiki/Trie).
+[trie](https://en.wikipedia.org/wiki/Trie)!
 
 After quickly reminding myself how tries work, I spent a couple of hours
 knocking this together.  It's probably not the greatest boggle solver in
