@@ -46,6 +46,9 @@ oaer
 hrpd
 ```
 
+A copy of this particular example can be found in the `sample_board.txt`
+file in the project root directory.
+
 The parser can handle any amount of whitespace between the letters, and
 will ignore blank rows after the data.  Those were common sources of
 crashiness.  The parser will complain if the rows are not all of the
