@@ -1,7 +1,21 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+//! Boggle solver
+//!
+//! The readme has more, but Boggle is a popular game released in 1972
+//! in which a collection of 16 dice with letters printed on the sides
+//! are tossed into a 4⨯4 grid and then the players have three minutes
+//! to find as many valid words as they can (valid according to the
+//! dictionary of choice (Americans typically use either Webster's or
+//! the Scrabble North American dictionary).
+
 pub mod dict;
 mod trie;
 use trie::Node;
 
+/// An aggregating structure for scanning the board.
 struct Scanned {
     positions: Vec<(isize, isize)>,
     word: String,
@@ -12,6 +26,9 @@ impl Scanned {
         Scanned { word, positions }
     }
 
+    /// During the course of searching the board, the add() function receives
+    /// a character and a position, and if the position has not been visited,
+    /// creates a new aggregate with previous word + the new character.
     pub fn add(&mut self, c: char, (i, j): (isize, isize)) -> Option<Scanned> {
         match self.positions.contains(&(i, j)) {
             true => None,
@@ -26,16 +43,17 @@ impl Scanned {
     }
 }
 
+/// A boggle game with a valid dictionary.
 pub struct Board<'a> {
     board: Vec<Vec<char>>,
-    words: &'a Node,
+    words: &'a Node<char>,
     mx: isize,
     my: isize,
     solutions: Vec<String>,
 }
 
 impl<'a> Board<'a> {
-    pub fn new(board: Vec<Vec<char>>, words: &Node) -> Option<Board> {
+    pub fn new(board: Vec<Vec<char>>, words: &Node<char>) -> Option<Board> {
         if board.is_empty() {
             return None;
         }
@@ -50,8 +68,9 @@ impl<'a> Board<'a> {
         })
     }
 
-    fn solveforpos(&mut self, posx: isize, posy: isize, curr: &mut Scanned) {
-        match curr.add(self.board[posx as usize][posy as usize], (posx, posy)) {
+    #[inline]
+    fn innersolveforpos(&mut self, c: char, posx: isize, posy: isize, curr: &mut Scanned) {
+        match curr.add(c, (posx, posy)) {
             None => return,
             Some(mut curr) => {
                 if curr.word.len() > 2 && self.words.find(&mut curr.word.chars()) {
@@ -76,6 +95,22 @@ impl<'a> Board<'a> {
         }
     }
 
+    
+    /// For any given position and current "word", see if the "word" is
+    /// long enough and exists in the dictionary.  If it does, add it
+    /// to the list of found words but DO NOT STOP (after all, if
+    /// there's "ant", there may be "ants").  If the current "word",
+    /// regardless of length, is not a prefix of any dictionary word,
+    /// terminate the search immediately.  Otherwise, recurse to all
+    /// neighboring positions.
+    fn solveforpos(&mut self, posx: isize, posy: isize, mut curr: &mut Scanned) {
+        let c = self.board[posx as usize][posy as usize];
+        self.innersolveforpos(c, posx, posy, &mut curr);
+    }
+
+    /// Solve the Boggle board
+    ///
+    /// For each position on the board, start a search.
     pub fn solve(&mut self) -> Vec<String> {
         for x in 0..self.mx {
             for y in 0..self.my {
