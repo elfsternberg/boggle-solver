@@ -29,17 +29,16 @@ impl Scanned {
     /// During the course of searching the board, the add() function receives
     /// a character and a position, and if the position has not been visited,
     /// creates a new aggregate with previous word + the new character.
-    pub fn add(&mut self, c: char, (i, j): (isize, isize)) -> Option<Scanned> {
-        match self.positions.contains(&(i, j)) {
-            true => None,
-            false => {
-                let mut newpos = self.positions.to_vec();
-                newpos.push((i, j));
-                let mut newword = self.word.to_string();
-                newword.push(c);
-                Some(Scanned::new(newword, newpos))
-            }
+    pub fn add(&mut self, c: char, (i, j): (isize, isize), pass: bool) -> Option<Scanned> {
+        if self.positions.contains(&(i, j)) || !pass {
+            return None;
         }
+
+        let mut newpos = self.positions.to_vec();
+        newpos.push((i, j));
+        let mut newword = self.word.to_string();
+        newword.push(c);
+        Some(Scanned::new(newword, newpos))
     }
 }
 
@@ -69,8 +68,8 @@ impl<'a> Board<'a> {
     }
 
     #[inline]
-    fn innersolveforpos(&mut self, c: char, posx: isize, posy: isize, curr: &mut Scanned) {
-        match curr.add(c, (posx, posy)) {
+    fn innersolveforpos(&mut self, c: char, posx: isize, posy: isize, curr: &mut Scanned, pass: bool) {
+        match curr.add(c, (posx, posy), pass) {
             None => return,
             Some(mut curr) => {
                 if curr.word.len() > 2 && self.words.find(&mut curr.word.chars()) {
@@ -105,7 +104,10 @@ impl<'a> Board<'a> {
     /// neighboring positions.
     fn solveforpos(&mut self, posx: isize, posy: isize, mut curr: &mut Scanned) {
         let c = self.board[posx as usize][posy as usize];
-        self.innersolveforpos(c, posx, posy, &mut curr);
+        self.innersolveforpos(c, posx, posy, &mut curr, true);
+        if c == 'q' {
+            self.innersolveforpos('u', posx, posy, &mut curr, false);
+        }
     }
 
     /// Solve the Boggle board
@@ -173,6 +175,24 @@ mod tests {
         assert_eq!(result, expected);
     }
 
+    #[test]
+    fn q_board() {
+        let trie = dict("/usr/share/dict/words");
+        let sample = sample_to_vecs(
+            &[&['q','u','e'],
+              &['e','e','y'],
+              &['n','s','r']]);
+        let mut expected = result_to_vec(
+            &["eery", "eye", "eyes", "queen", "queens", "queer", "queers", "query",
+              "rye", "see", "seen", "seer", "sneer", "yen", "yens", "yes"]);
+        let mut board = Board::new(sample, &trie).unwrap();
+        let mut result = board.solve();
+        expected.sort();
+        result.sort();
+        assert_eq!(result, expected);
+    }
+
+    
     fn sample_to_vecs(arr: &[&[char]]) -> Vec<Vec<char>> {
         let mut res = Vec::new();
         for i in arr {
