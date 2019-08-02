@@ -7,3 +7,4 @@ Cargo.lock
 *.chs.h
 **/*.rs.bk
 target
+twl06.txt
