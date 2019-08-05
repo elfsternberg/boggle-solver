@@ -4,9 +4,16 @@ version = "0.1.0"
 authors = ["Elf M. Sternberg <elf.sternberg@gmail.com>"]
 edition = "2018"
 
+[features]
+large_board = ["fsbitmap"]
+
 [dependencies]
 clap = "2.33.0"
 regex = "1"
+fsbitmap = { version = "0.1.0", git = "https://github.com/elfsternberg/fsbitmap-rs", optional = true }
+
+[profile.release]
+debug = true
 
 [lib]
 name = "boggle_solver"

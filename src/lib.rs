@@ -2,43 +2,100 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-//! Boggle solver
-//!
-//! The readme has more, but Boggle is a popular game released in 1972
-//! in which a collection of 16 dice with letters printed on the sides
-//! are tossed into a 4⨯4 grid and then the players have three minutes
-//! to find as many valid words as they can (valid according to the
-//! dictionary of choice (Americans typically use either Webster's or
-//! the Scrabble North American dictionary).
+/// Boggle solver
+///
+/// The readme has more, but Boggle is a popular game released in 1972
+/// in which a collection of 16 dice with letters printed on the sides
+/// are tossed into a 4⨯4 grid and then the players have three minutes
+/// to find as many valid words as they can (valid according to the
+/// dictionary of choice (Americans typically use either Webster's or
+/// the Scrabble North American dictionary).
 
 pub mod dict;
 mod trie;
 use trie::Node;
 
+#[cfg(not(feature="large_board"))]
+struct Ledger(isize, isize, u64);
+
+#[cfg(not(feature="large_board"))]
+impl Ledger {
+    pub fn new(x: isize, y:isize) -> Ledger { Ledger(x, y, 0) }
+
+    #[inline]
+    fn next(&self, ledger: u64) -> Ledger {
+        Ledger(self.0, self.1, ledger)
+    }
+
+    #[inline]
+    fn point(&self, x: isize, y: isize) -> u64 {
+        1 << (self.1 * x + y)
+    }
+        
+    pub fn mark(&self, x: isize, y: isize) -> Ledger {
+        self.next(self.2 | self.point(x, y))
+    }
+    pub fn check(&self, x: isize, y:isize) -> bool {
+        let v = self.point(x, y);
+        self.2 & v == v
+    }
+}
+
+#[cfg(feature="large_board")]
+extern crate fsbitmap;
+
+#[cfg(feature="large_board")]
+use fsbitmap::FSBitmap;
+
+#[cfg(feature="large_board")]
+struct Ledger(isize, isize, FSBitmap);
+
+#[cfg(feature="large_board")]
+impl Ledger {
+    pub fn new(x: isize, y:isize) -> Ledger { Ledger(x, y, FSBitmap::new((x * y) as usize)) }
+
+    #[inline]
+    fn next(&self, ledger: FSBitmap) -> Ledger {
+        Ledger(self.0, self.1, ledger)
+    }
+
+    #[inline]
+    fn point(&self, x: isize, y: isize) -> u64 {
+        (self.0 * x + (y % self.1)) as u64
+    }
+
+    pub fn mark(&mut self, x: isize, y: isize) -> Ledger {
+        let mut newmap = self.2.clone();
+        newmap.mark(self.point(x, y) as usize);
+        self.next(newmap)
+    }
+    pub fn check(&self, x: isize, y:isize) -> bool {
+        self.2.check(self.point(x, y) as usize)
+    }
+}
+
 /// An aggregating structure for scanning the board.
 struct Scanned {
-    positions: Vec<(isize, isize)>,
+    positions: Ledger,
     word: String,
 }
 
 impl Scanned {
-    pub fn new(word: String, positions: Vec<(isize, isize)>) -> Scanned {
+    pub fn new(word: String, positions: Ledger) -> Scanned {
         Scanned { word, positions }
     }
 
     /// During the course of searching the board, the add() function receives
     /// a character and a position, and if the position has not been visited,
     /// creates a new aggregate with previous word + the new character.
-    pub fn add(&mut self, c: char, (i, j): (isize, isize), pass: bool) -> Option<Scanned> {
-        if self.positions.contains(&(i, j)) || !pass {
+    pub fn add(&mut self, c: char, (i, j): (isize, isize), skip_pos_check: bool) -> Option<Scanned> {
+        if self.positions.check(i, j) || skip_pos_check {
             return None;
         }
 
-        let mut newpos = self.positions.to_vec();
-        newpos.push((i, j));
         let mut newword = self.word.to_string();
         newword.push(c);
-        Some(Scanned::new(newword, newpos))
+        Some(Scanned::new(newword, self.positions.mark(i, j)))
     }
 }
 
@@ -52,6 +109,10 @@ pub struct Board<'a> {
 }
 
 impl<'a> Board<'a> {
+
+    /// Takes an n⨯m board of char, and a dictionary, and returns
+    /// a new Board waiting to be solved.
+    ///
     pub fn new(board: Vec<Vec<char>>, words: &Node<char>) -> Option<Board> {
         if board.is_empty() {
             return None;
@@ -67,9 +128,23 @@ impl<'a> Board<'a> {
         })
     }
 
+    /// Solve the Boggle board
+    ///
+    pub fn solve(&mut self) -> Vec<String> {
+        for x in 0..self.mx {
+            for y in 0..self.my {
+                let mut possibles = Scanned::new("".to_string(), Ledger::new(self.mx, self.my));
+                self.solveforpos(x, y, &mut possibles)
+            }
+        }
+        self.solutions.sort();
+        self.solutions.dedup();
+        self.solutions.to_vec()
+    }
+
     #[inline]
-    fn innersolveforpos(&mut self, c: char, posx: isize, posy: isize, curr: &mut Scanned, pass: bool) {
-        match curr.add(c, (posx, posy), pass) {
+    fn innersolveforpos(&mut self, c: char, posx: isize, posy: isize, curr: &mut Scanned, skip_pos_check: bool) {
+        match curr.add(c, (posx, posy), skip_pos_check) {
             None => return,
             Some(mut curr) => {
                 if curr.word.len() > 2 && self.words.find(&mut curr.word.chars()) {
@@ -104,26 +179,12 @@ impl<'a> Board<'a> {
     /// neighboring positions.
     fn solveforpos(&mut self, posx: isize, posy: isize, mut curr: &mut Scanned) {
         let c = self.board[posx as usize][posy as usize];
-        self.innersolveforpos(c, posx, posy, &mut curr, true);
+        self.innersolveforpos(c, posx, posy, &mut curr, false);
         if c == 'q' {
-            self.innersolveforpos('u', posx, posy, &mut curr, false);
+            self.innersolveforpos('u', posx, posy, &mut curr, true);
         }
     }
 
-    /// Solve the Boggle board
-    ///
-    /// For each position on the board, start a search.
-    pub fn solve(&mut self) -> Vec<String> {
-        for x in 0..self.mx {
-            for y in 0..self.my {
-                let mut possibles = Scanned::new("".to_string(), Vec::new());
-                self.solveforpos(x, y, &mut possibles)
-            }
-        }
-        self.solutions.sort();
-        self.solutions.dedup();
-        self.solutions.to_vec()
-    }
 }
 
 #[cfg(test)]
