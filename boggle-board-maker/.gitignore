@@ -1,0 +1,10 @@
+.#*
+*~
+*#
+*.aux
+Cargo.lock
+*.chi
+*.chs.h
+**/*.rs.bk
+target
+twl06.txt

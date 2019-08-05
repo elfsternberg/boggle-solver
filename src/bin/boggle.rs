@@ -11,7 +11,7 @@ use clap::{App, Arg};
 use regex::Regex;
 
 pub fn main() {
-    let matches = App::new("boggle")
+    let matches = App::new("solveboggle")
         .version("0.1.0")
         .author("Elf M. Sternberg <elf.sternberg@gmail.com>")
         .about("Boggle™ solver written in Rust")
