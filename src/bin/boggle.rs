@@ -2,7 +2,7 @@ extern crate clap;
 extern crate regex;
 
 use boggle_solver::dict::dict;
-use boggle_solver::Board;
+use boggle_solver::{Board, solve};
 
 use std::fs::File;
 use std::io::{BufRead, BufReader, Write};
@@ -92,8 +92,8 @@ pub fn main() {
         board
     };
 
-    let mut board = Board::new(board, &trie).unwrap();
-    let solutions = board.solve();
+    let board = Board::new(board, &trie).unwrap();
+    let solutions = solve(&board);
 
     if matches.is_present("score") {
         let mut tally = 0;

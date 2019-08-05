@@ -105,7 +105,6 @@ pub struct Board<'a> {
     words: &'a Node<char>,
     mx: isize,
     my: isize,
-    solutions: Vec<String>,
 }
 
 impl<'a> Board<'a> {
@@ -124,43 +123,42 @@ impl<'a> Board<'a> {
             words,
             mx,
             my,
-            solutions: Vec::new(),
         })
     }
 
-    /// Solve the Boggle board
-    ///
-    pub fn solve(&mut self) -> Vec<String> {
-        for x in 0..self.mx {
-            for y in 0..self.my {
-                let mut possibles = Scanned::new("".to_string(), Ledger::new(self.mx, self.my));
-                self.solveforpos(x, y, &mut possibles)
-            }
+}
+
+
+/// Solve the Boggle board
+///
+pub fn solve(board: &Board) -> Vec<String> {
+
+    fn solveforpos(board: &Board, (x, y): (isize, isize), curr: &mut Scanned, solutions: &mut Vec<String>) {
+        let c = board.board[x as usize][y as usize];
+        innersolveforpos(c, board, (x, y), curr, solutions, false);
+        if c == 'q' {
+            innersolveforpos('u', board, (x, y), curr, solutions, true);
         }
-        self.solutions.sort();
-        self.solutions.dedup();
-        self.solutions.to_vec()
     }
 
-    #[inline]
-    fn innersolveforpos(&mut self, c: char, posx: isize, posy: isize, curr: &mut Scanned, skip_pos_check: bool) {
-        match curr.add(c, (posx, posy), skip_pos_check) {
+    fn innersolveforpos(c: char, board: &Board, (x, y): (isize, isize), curr: &mut Scanned, solutions: &mut Vec<String>, skip_pos_check: bool) {
+        match curr.add(c, (x, y), skip_pos_check) {
             None => return,
-            Some(mut curr) => {
-                if curr.word.len() > 2 && self.words.find(&mut curr.word.chars()) {
-                    self.solutions.push(curr.word.to_string());
+            Some(mut newcurr) => {
+                if newcurr.word.len() > 2 && board.words.find(&mut newcurr.word.chars()) {
+                    solutions.push(newcurr.word.to_string());
                 }
-
-                if !self.words.pref(&mut curr.word.chars()) {
+                
+                if !board.words.pref(&mut newcurr.word.chars()) {
                     return;
                 }
-
-                for x in -1..=1 {
-                    for y in -1..=1 {
-                        if !(y == 0 && x == 0) {
-                            let (nx, ny): (isize, isize) = (posx as isize + x, posy as isize + y);
-                            if nx >= 0 && nx < self.mx && ny >= 0 && ny < self.my {
-                                self.solveforpos(nx, ny, &mut curr)
+                
+                for i in -1..=1 {
+                    for j in -1..=1 {
+                        if !(i == 0 && j == 0) {  // Skip the current block!
+                            let (nx, ny): (isize, isize) = (x as isize + i, y as isize + j);
+                            if nx >= 0 && nx < board.mx && ny >= 0 && ny < board.my {
+                                solveforpos(board, (nx, ny), &mut newcurr, solutions)
                             }
                         }
                     }
@@ -169,23 +167,34 @@ impl<'a> Board<'a> {
         }
     }
 
-    
-    /// For any given position and current "word", see if the "word" is
-    /// long enough and exists in the dictionary.  If it does, add it
-    /// to the list of found words but DO NOT STOP (after all, if
-    /// there's "ant", there may be "ants").  If the current "word",
-    /// regardless of length, is not a prefix of any dictionary word,
-    /// terminate the search immediately.  Otherwise, recurse to all
-    /// neighboring positions.
-    fn solveforpos(&mut self, posx: isize, posy: isize, mut curr: &mut Scanned) {
-        let c = self.board[posx as usize][posy as usize];
-        self.innersolveforpos(c, posx, posy, &mut curr, false);
-        if c == 'q' {
-            self.innersolveforpos('u', posx, posy, &mut curr, true);
+    let mut work = {
+        let mut work: Vec::<(isize, isize, Scanned, Vec<String>)> = vec![];
+        for x in 0..board.mx {
+            for y in 0..board.my {
+                work.push((x, y, Scanned::new("".to_string(), Ledger::new(board.mx, board.my)), vec![]));
+            }
         }
+        work
+    };
+
+    for job in &mut work {
+        // This is where the work queue goes.  Each job will be
+        // independently run in a worker, and the results collated
+        // together afterward.  This is the first step toward
+        // map/reducing the solver.
+        solveforpos(&board, (job.0, job.1), &mut job.2, &mut job.3);
     }
 
+    let mut solutions: Vec<String> = vec![];
+    for job in &mut work {
+        solutions.extend(job.3.iter().cloned())
+    }
+
+    solutions.sort();
+    solutions.dedup();
+    solutions
 }
+
 
 #[cfg(test)]
 mod tests {
@@ -197,8 +206,8 @@ mod tests {
         let trie = dict("/usr/share/dict/words");
         let sample = sample_to_vecs(&[&['a', 'n'], &['t', 'd']]);
         let mut expected = result_to_vec(&["ant", "and", "tan", "tad"]);
-        let mut board = Board::new(sample, &trie).unwrap();
-        let mut result = board.solve();
+        let board = Board::new(sample, &trie).unwrap();
+        let mut result = solve(&board);
         expected.sort();
         result.sort();
         assert_eq!(result, expected);
@@ -214,7 +223,7 @@ mod tests {
             &['l', 'd', 'h', 'c'],
         ]);
 
-        let mut board = Board::new(sample, &trie).unwrap();
+        let board = Board::new(sample, &trie).unwrap();
         let mut expected = result_to_vec(&[
             "ape", "apt", "apter", "ate", "cheep", "cheer", "chi", "chin", "chirp", "deed", "deem",
             "deep", "deer", "den", "denier", "dent", "dented", "deter", "eat", "eaten", "eater",
@@ -230,7 +239,7 @@ mod tests {
             "tap", "tape", "taper", "tea", "team", "teamed", "tee", "teed", "teem", "teen",
             "teenier", "ten", "tend", "tended", "tern",
         ]);
-        let mut result = board.solve();
+        let mut result = solve(&board);
         expected.sort();
         result.sort();
         assert_eq!(result, expected);
@@ -246,8 +255,8 @@ mod tests {
         let mut expected = result_to_vec(
             &["eery", "eye", "eyes", "queen", "queens", "queer", "queers", "query",
               "rye", "see", "seen", "seer", "sneer", "yen", "yens", "yes"]);
-        let mut board = Board::new(sample, &trie).unwrap();
-        let mut result = board.solve();
+        let board = Board::new(sample, &trie).unwrap();
+        let mut result = solve(&board);
         expected.sort();
         result.sort();
         assert_eq!(result, expected);
