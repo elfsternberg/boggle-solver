@@ -2,7 +2,7 @@ extern crate clap;
 extern crate regex;
 
 use boggle_solver::dict::dict;
-use boggle_solver::{Board, solve};
+use boggle_solver::{solve, Board};
 
 use std::fs::File;
 use std::io::{BufRead, BufReader, Write};
@@ -104,9 +104,14 @@ pub fn main() {
                 5 => 2,
                 6 => 3,
                 7 => 5,
-                _ => 11
+                _ => 11,
             };
-            println!("{word:>width$}: {score}", word=s, width=17, score=score);
+            println!(
+                "{word:>width$}: {score}",
+                word = s,
+                width = 17,
+                score = score
+            );
             tally += score
         }
         println!("\nTotal: {}", tally);

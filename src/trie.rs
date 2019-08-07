@@ -6,7 +6,7 @@
 //!
 //! This library implements a fairly generic trie structure in which
 //! the edges rather than the nodes are the source of the data, which
-//! is more or less what you want for a dictionary trie.  
+//! is more or less what you want for a dictionary trie.
 
 use std::collections::HashMap;
 use std::hash::Hash;
@@ -37,7 +37,6 @@ impl<C> Node<C>
 where
     C: Copy + Hash + Eq,
 {
-    
     /// The empty string is not a word in any dictionary.  The root node
     /// is always false.
     pub fn new() -> Node<C> {
@@ -106,23 +105,6 @@ where
         self.search(word, &|_s| true)
     }
 }
-
-
-// pub struct FrozenNode<C>(HashMap<C, FrozenNode<C>>, bool)
-// where
-//     C: Copy + Hash + Eq;
-// 
-// impl<C> FrozenNode<C>
-// where
-//     C: Copy + Hash + Eq,
-// {
-//     pub fn freeze(node: &Node<C>) -> FrozenNode<C> {
-//         FrozenNode(HashMap::from(node.0.iter().map(|(k, v)| (*k, FrozenNode::freeze(&v.borrow()))).collect()), node.1)
-//     }
-//     
-// }
-
-
 
 #[cfg(test)]
 mod tests {

@@ -10,7 +10,6 @@
 /// to find as many valid words as they can (valid according to the
 /// dictionary of choice (Americans typically use either Webster's or
 /// the Scrabble North American dictionary).
-
 extern crate crossbeam;
 extern crate crossbeam_deque;
 extern crate num_cpus;
@@ -19,15 +18,17 @@ pub mod dict;
 mod trie;
 use trie::Node;
 
-use crossbeam_deque::{Injector, Steal, Worker};
 use crossbeam::thread::ScopedJoinHandle;
+use crossbeam_deque::{Injector, Steal, Worker};
 
-#[cfg(not(feature="large_board"))]
+#[cfg(not(feature = "large_board"))]
 struct Ledger(isize, isize, u64);
 
-#[cfg(not(feature="large_board"))]
+#[cfg(not(feature = "large_board"))]
 impl Ledger {
-    pub fn new(x: isize, y:isize) -> Ledger { Ledger(x, y, 0) }
+    pub fn new(x: isize, y: isize) -> Ledger {
+        Ledger(x, y, 0)
+    }
 
     #[inline]
     fn next(&self, ledger: u64) -> Ledger {
@@ -38,27 +39,29 @@ impl Ledger {
     fn point(&self, x: isize, y: isize) -> u64 {
         1 << (self.1 * x + y)
     }
-        
+
     pub fn mark(&self, x: isize, y: isize) -> Ledger {
         self.next(self.2 | self.point(x, y))
     }
-    pub fn check(&self, x: isize, y:isize) -> bool {
+    pub fn check(&self, x: isize, y: isize) -> bool {
         self.2 & self.point(x, y) != 0
     }
 }
 
-#[cfg(feature="large_board")]
+#[cfg(feature = "large_board")]
 extern crate fsbitmap;
 
-#[cfg(feature="large_board")]
+#[cfg(feature = "large_board")]
 use fsbitmap::FSBitmap;
 
-#[cfg(feature="large_board")]
+#[cfg(feature = "large_board")]
 struct Ledger(isize, isize, FSBitmap);
 
-#[cfg(feature="large_board")]
+#[cfg(feature = "large_board")]
 impl Ledger {
-    pub fn new(x: isize, y:isize) -> Ledger { Ledger(x, y, FSBitmap::new((x * y) as usize)) }
+    pub fn new(x: isize, y: isize) -> Ledger {
+        Ledger(x, y, FSBitmap::new((x * y) as usize))
+    }
 
     #[inline]
     fn next(&self, ledger: FSBitmap) -> Ledger {
@@ -75,7 +78,7 @@ impl Ledger {
         newmap.mark(self.point(x, y) as usize);
         self.next(newmap)
     }
-    pub fn check(&self, x: isize, y:isize) -> bool {
+    pub fn check(&self, x: isize, y: isize) -> bool {
         self.2.check(self.point(x, y) as usize)
     }
 }
@@ -91,7 +94,12 @@ impl Scanned {
     /// During the course of searching the board, the add() function receives
     /// a character and a position, and if the position has not been visited,
     /// creates a new aggregate with previous word + the new character.
-    pub fn add(&mut self, c: char, (i, j): (isize, isize), skip_pos_check: bool) -> Option<Scanned> {
+    pub fn add(
+        &mut self,
+        c: char,
+        (i, j): (isize, isize),
+        skip_pos_check: bool,
+    ) -> Option<Scanned> {
         if self.1.check(i, j) || skip_pos_check {
             return None;
         }
@@ -111,7 +119,6 @@ pub struct Board<'a> {
 }
 
 impl<'a> Board<'a> {
-
     /// Takes an n⨯m board of char, and a dictionary, and returns
     /// a new Board waiting to be solved.
     ///
@@ -128,11 +135,14 @@ impl<'a> Board<'a> {
             my,
         })
     }
-
 }
 
-
-fn solveforpos(board: &Board, (x, y): (isize, isize), curr: &mut Scanned, solutions: &mut Vec<String>) {
+fn solveforpos(
+    board: &Board,
+    (x, y): (isize, isize),
+    curr: &mut Scanned,
+    solutions: &mut Vec<String>,
+) {
     let c = board.board[x as usize][y as usize];
     innersolveforpos(c, board, (x, y), curr, solutions, false);
     if c == 'q' {
@@ -140,21 +150,29 @@ fn solveforpos(board: &Board, (x, y): (isize, isize), curr: &mut Scanned, soluti
     }
 }
 
-fn innersolveforpos(c: char, board: &Board, (x, y): (isize, isize), curr: &mut Scanned, solutions: &mut Vec<String>, skip_pos_check: bool) {
+fn innersolveforpos(
+    c: char,
+    board: &Board,
+    (x, y): (isize, isize),
+    curr: &mut Scanned,
+    solutions: &mut Vec<String>,
+    skip_pos_check: bool,
+) {
     match curr.add(c, (x, y), skip_pos_check) {
         None => return,
         Some(mut newcurr) => {
             if newcurr.0.len() > 2 && board.words.find(&mut newcurr.0.chars()) {
                 solutions.push(newcurr.0.to_string());
             }
-            
+
             if !board.words.pref(&mut newcurr.0.chars()) {
                 return;
             }
-            
+
             for i in -1..=1 {
                 for j in -1..=1 {
-                    if !(i == 0 && j == 0) {  // Skip the current block!
+                    if !(i == 0 && j == 0) {
+                        // Skip the current block!
                         let (nx, ny): (isize, isize) = (x as isize + i, y as isize + j);
                         if nx >= 0 && nx < board.mx && ny >= 0 && ny < board.my {
                             solveforpos(board, (nx, ny), &mut newcurr, solutions)
@@ -170,10 +188,15 @@ fn innersolveforpos(c: char, board: &Board, (x, y): (isize, isize), curr: &mut S
 ///
 pub fn solve(board: &Board) -> Vec<String> {
     let mut work = {
-        let mut work: Vec::<(isize, isize, Scanned, Vec<String>)> = vec![];
+        let mut work: Vec<(isize, isize, Scanned, Vec<String>)> = vec![];
         for x in 0..board.mx {
             for y in 0..board.my {
-                work.push((x, y, Scanned::new("".to_string(), Ledger::new(board.mx, board.my)), vec![]));
+                work.push((
+                    x,
+                    y,
+                    Scanned::new("".to_string(), Ledger::new(board.mx, board.my)),
+                    vec![],
+                ));
             }
         }
         work
@@ -200,27 +223,28 @@ pub fn solve(board: &Board) -> Vec<String> {
 fn find_task<T>(local: &mut Worker<T>, global: &Injector<T>) -> Option<T> {
     match local.pop() {
         Some(job) => Some(job),
-        None => {
-            loop {
-                match global.steal() {
-                    Steal::Success(job) => break Some(job),
-                    Steal::Empty => break None,
-                    Steal::Retry => {}
-                }
+        None => loop {
+            match global.steal() {
+                Steal::Success(job) => break Some(job),
+                Steal::Empty => break None,
+                Steal::Retry => {}
             }
-        }
+        },
     }
 }
 
 pub fn solve_mt(board: &Board, threads: usize) -> Vec<String> {
-
     struct Job(isize, isize, Scanned);
 
     let work = &{
-        let work : Injector<Job> = Injector::new();
+        let work: Injector<Job> = Injector::new();
         for x in 0..board.mx {
             for y in 0..board.my {
-                work.push(Job(x, y, Scanned::new("".to_string(), Ledger::new(board.mx, board.my))));
+                work.push(Job(
+                    x,
+                    y,
+                    Scanned::new("".to_string(), Ledger::new(board.mx, board.my)),
+                ));
             }
         }
         work
@@ -237,30 +261,36 @@ pub fn solve_mt(board: &Board, threads: usize) -> Vec<String> {
     // generate the threads before starting the work.
     let mut solutions: Vec<String> = vec![];
     crossbeam::scope(|spawner| {
-        let handles: Vec<ScopedJoinHandle<Vec<String>>> = (0..threads).map(|_| {
-            spawner.spawn(move |_| {
-                let mut solutions: Vec<String> = vec![];
-                let mut queue: Worker<Job> = Worker::new_fifo();
-                loop {
-                    match find_task(&mut queue, &work) {
-                        Some(mut job) => {
-                            solveforpos(&board, (job.0, job.1), &mut job.2, &mut solutions);
-                        },
-                        None => break,
+        let handles: Vec<ScopedJoinHandle<Vec<String>>> = (0..threads)
+            .map(|_| {
+                spawner.spawn(move |_| {
+                    let mut solutions: Vec<String> = vec![];
+                    let mut queue: Worker<Job> = Worker::new_fifo();
+                    loop {
+                        match find_task(&mut queue, &work) {
+                            Some(mut job) => {
+                                solveforpos(&board, (job.0, job.1), &mut job.2, &mut solutions);
+                            }
+                            None => break,
+                        }
                     }
-                };
-                solutions
+                    solutions
+                })
             })
-        }).collect();
+            .collect();
 
-        solutions = handles.into_iter().map(|handle| handle.join().unwrap()).flatten().collect()
-    }).unwrap();
+        solutions = handles
+            .into_iter()
+            .map(|handle| handle.join().unwrap())
+            .flatten()
+            .collect()
+    })
+    .unwrap();
 
     solutions.sort();
     solutions.dedup();
     solutions
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -314,13 +344,11 @@ mod tests {
     #[test]
     fn q_board() {
         let trie = dict("/usr/share/dict/words");
-        let sample = sample_to_vecs(
-            &[&['q','u','e'],
-              &['e','e','y'],
-              &['n','s','r']]);
-        let mut expected = result_to_vec(
-            &["eery", "eye", "eyes", "queen", "queens", "queer", "queers", "query",
-              "rye", "see", "seen", "seer", "sneer", "yen", "yens", "yes"]);
+        let sample = sample_to_vecs(&[&['q', 'u', 'e'], &['e', 'e', 'y'], &['n', 's', 'r']]);
+        let mut expected = result_to_vec(&[
+            "eery", "eye", "eyes", "queen", "queens", "queer", "queers", "query", "rye", "see",
+            "seen", "seer", "sneer", "yen", "yens", "yes",
+        ]);
         let board = Board::new(sample, &trie).unwrap();
         let mut result = solve(&board);
         expected.sort();
@@ -328,7 +356,6 @@ mod tests {
         assert_eq!(result, expected);
     }
 
-    
     fn sample_to_vecs(arr: &[&[char]]) -> Vec<Vec<char>> {
         let mut res = Vec::new();
         for i in arr {
@@ -392,5 +419,5 @@ mod tests {
         result.sort();
         assert_eq!(result, expected);
     }
-    
+
 }
