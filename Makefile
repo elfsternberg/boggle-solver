@@ -10,10 +10,9 @@ default: help
 # about in generating his project.  This somewhat magical Perl script
 # processes the Makefile twice: first to find the longest command
 # we're going to be providing help for, and then to print out the help
-# table with the right amount of white-space to make two neat
-# columns of command & documentation.  The '@' header makes it silent,
-# so you don't have to watch *this* particular bit of sausage being
-# made.
+# table with the right amount of white-space to make two neat columns
+# of command & documentation.  The '@' header makes it silent, so you
+# don't have to watch *this* particular bit of sausage being made.
 
 help:	## Print this help message
 	@M=$$(perl -ne 'm/^((\w|-)*):.*##/ && print length($$1)."\n"' Makefile | \
@@ -32,6 +31,9 @@ release: target/release/boggle	## Build the release binary
 
 test: 	## Run all the unit tests available
 	cargo test
+	cargo test --features=large_board
+	cargo test --features=threaded
+	cargo test --features=large_board,threaded
 
 clean:	## Delete all built and intermediate features
 	cargo clean
