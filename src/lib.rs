@@ -18,7 +18,9 @@ extern crate num_cpus;
 pub mod dict;
 mod trie;
 use trie::Node;
+
 use crossbeam_deque::{Injector, Steal, Worker};
+use crossbeam::thread::ScopedJoinHandle;
 
 #[cfg(not(feature="large_board"))]
 struct Ledger(isize, isize, u64);
@@ -224,11 +226,19 @@ pub fn solve_mt(board: &Board, threads: usize) -> Vec<String> {
         work
     };
 
+    // Having to predefine the solutions object outside the scope so
+    // that it's available during the join is a little awkward and
+    // un-functional.
+    //
+    // Also, the collect() down there at the bottom of the map() function is
+    // absolutely necessary; without it, the spawner only spawns once and
+    // map waits for that to finish before spawning the other threads.  By
+    // using collect(), we force map out of laziness and into eagerness, and
+    // generate the threads before starting the work.
     let mut solutions: Vec<String> = vec![];
     crossbeam::scope(|spawner| {
-        let mut handles = Vec::new();
-        for _ in 0..threads {
-            handles.push(spawner.spawn(move |_| {
+        let handles: Vec<ScopedJoinHandle<Vec<String>>> = (0..threads).map(|_| {
+            spawner.spawn(move |_| {
                 let mut solutions: Vec<String> = vec![];
                 let mut queue: Worker<Job> = Worker::new_fifo();
                 loop {
@@ -240,8 +250,9 @@ pub fn solve_mt(board: &Board, threads: usize) -> Vec<String> {
                     }
                 };
                 solutions
-            }));
-        }
+            })
+        }).collect();
+
         solutions = handles.into_iter().map(|handle| handle.join().unwrap()).flatten().collect()
     }).unwrap();
 
