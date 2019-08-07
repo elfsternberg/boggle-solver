@@ -8,9 +8,9 @@
 //! the edges rather than the nodes are the source of the data, which
 //! is more or less what you want for a dictionary trie.  
 
-use std::cell::RefCell;
 use std::collections::HashMap;
 use std::hash::Hash;
+use std::sync::RwLock;
 
 /// A single node in a trie
 ///
@@ -29,7 +29,7 @@ use std::hash::Hash;
 /// whole word, but the hashmap would then contain 'a', 'e', and 's',
 /// for 'oriental', 'oriented', and 'orients'.
 
-pub struct Node<C>(HashMap<C, Box<RefCell<Node<C>>>>, bool)
+pub struct Node<C>(HashMap<C, Box<RwLock<Node<C>>>>, bool)
 where
     C: Copy + Hash + Eq;
 
@@ -61,10 +61,10 @@ where
             None => {
                 let mut newtrie = Node::new();
                 newtrie.insert(word);
-                self.0.insert(c, Box::new(RefCell::new(newtrie)));
+                self.0.insert(c, Box::new(RwLock::new(newtrie)));
             }
             Some(node) => {
-                node.borrow_mut().insert(word);
+                (*node.write().unwrap()).insert(word);
             }
         };
     }
@@ -87,7 +87,7 @@ where
         // carry on.
         match self.0.get(&c) {
             None => false,
-            Some(n) => n.borrow().search(word, endstate),
+            Some(n) => (*n.read().unwrap()).search(word, endstate),
         }
     }
 
@@ -106,6 +106,23 @@ where
         self.search(word, &|_s| true)
     }
 }
+
+
+// pub struct FrozenNode<C>(HashMap<C, FrozenNode<C>>, bool)
+// where
+//     C: Copy + Hash + Eq;
+// 
+// impl<C> FrozenNode<C>
+// where
+//     C: Copy + Hash + Eq,
+// {
+//     pub fn freeze(node: &Node<C>) -> FrozenNode<C> {
+//         FrozenNode(HashMap::from(node.0.iter().map(|(k, v)| (*k, FrozenNode::freeze(&v.borrow()))).collect()), node.1)
+//     }
+//     
+// }
+
+
 
 #[cfg(test)]
 mod tests {
