@@ -3,6 +3,10 @@ name = "boggle-solver"
 version = "0.1.0"
 authors = ["Elf M. Sternberg <elf.sternberg@gmail.com>"]
 edition = "2018"
+license = "MPL-2.0+"
+description = "Boggle™ Automatic Solver"
+repository = "https://github.com/elfsternberg/boggle-solver"
+readme = "./README.md"
 
 [features]
 large_board = ["fsbitmap"]

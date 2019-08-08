@@ -1,11 +1,11 @@
 [package]
 name = "boggle-generator"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Elf M. Sternberg <elf.sternberg@gmail.com>"]
 edition = "2018"
 license = "MPL-2.0+"
 description = "Boggle board generator function and binary"
-homepage = "https://github.com/elfsternberg/boggle-solver/"
+repository = "https://github.com/elfsternberg/boggle-solver/"
 readme = "./README.md"
 
 [dependencies]
