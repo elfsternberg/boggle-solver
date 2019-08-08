@@ -19,13 +19,35 @@ it hit me: dammit, the correct data structure for finding words is a
 [trie](https://en.wikipedia.org/wiki/Trie)!
 
 After quickly reminding myself how tries work, I spent a couple of hours
-knocking this together.  It's probably not the greatest boggle solver in
+knocking this together.  It's probably not the greatest Boggle solver in
 the world; it doesn't do anything fancy, it's just a brute force
 scan-the-board engine. It does terminate early if it generate a prefix
 for which no words exist in the sample dictionary.  The trie is
 implemented more or less the way Wikipedia explains it, and its ability
 to distinguish between a whole word and a prefix is nicely clever, I
 think.
+
+The multi-threaded version, small-board version of the solver (see
+"Features" in the next section) solves a standard Boggle board in about
+500 nanoseconds using four threads.
+
+## Features
+
+There are two features that are not enabled by default and require the
+use of the `--features` flag to enable:
+
+`cargo build --features=large_board` will enable the solver to work over
+boards larger than 8x8.  The regular board uses a 64-bit integer as a
+bitmap for tracking completed work.  With this feature enabled, a
+dynamically sized bitmap is used instead.  The dynamic bitmap uses two
+lookups instead of one, but this doesn't seem to make a huge difference
+performance-wise.
+
+`cargo build --features=threaded` will enable the multi-threaded version
+of the solver.  When this in enabled, the `solve()` function will use
+half the availble cores on your computer.  Another function,
+`solve_mt()`, has a second parameter to provide greater control over the
+number of threads the library can use.
 
 ## The Binary
 
@@ -47,12 +69,23 @@ hrpd
 ```
 
 A copy of this particular example can be found in the `sample_board.txt`
-file in the project root directory
+file in the project root directory.  The parser is forgiving. It ignores
+spaces and tabs and it doesn't care about case.  All output will be in
+lower case.
 
 The parser can handle any amount of whitespace between the letters, and
 will ignore blank rows after the data.  Those were common sources of
 crashiness.  The parser will complain if the rows are not all of the
 same length.
+
+## Q
+
+The letter 'Q' is an annoyance, as in Boggle it appears on the die face
+as "Qu" and Boggle rules allow it to be used as both 'Q' and 'Qu'.  (The
+only two common words in English that are 'Q' but not 'Qu' are 'sheqel'
+and 'burqa'.)  The code has a special case for handling it, which is why
+the 'choose a letter' and 'analyze the path from that letter' is in two
+different code groups.  There is a unit test to assert it works.
 
 ## Caveats:
 
@@ -68,6 +101,12 @@ non-existent.  Sorry about that.
 
 The file `twl06.txt.xz` included in the project root is a
 copy of the unofficial North American Scrabble™ word list.
+
+## Boggle Board Generator
+
+A folder in this project contains a [Boggle board
+generator](./boggle-board-maker), in case you feel like making your own.
+Like this one, it's a library with a standalone binary.
 
 ## ToDo
 
