@@ -1,23 +1,22 @@
 use crate::board::{solveforpos, Board, Scanned};
 use crate::Ledger;
+use ndranges::ndrange;
 
 /// Solve the Boggle board
 ///
 pub fn solve(board: &Board) -> Vec<String> {
-    let mut work = {
-        let mut work: Vec<(isize, isize, Scanned, Vec<String>)> = vec![];
-        for x in 0..board.mx {
-            for y in 0..board.my {
-                work.push((
-                    x,
-                    y,
+    let mut work: Vec<(isize, isize, Scanned, Vec<String>)> =
+        ndrange(0..(board.mx as u64), 0..(board.my as u64))
+            .into_iter()
+            .map(|(x, y)| {
+                (
+                    x as isize,
+                    y as isize,
                     Scanned::new("".to_string(), Ledger::new(board.mx, board.my)),
                     vec![],
-                ));
-            }
-        }
-        work
-    };
+                )
+            })
+            .collect();
 
     for job in &mut work {
         // This is where the work queue goes.  Each job will be

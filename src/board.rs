@@ -1,5 +1,6 @@
 use crate::trie::Node;
 use crate::Ledger;
+use ndranges::ndrange;
 
 /// An aggregating structure for scanning the board.
 ///
@@ -99,17 +100,13 @@ fn innersolveforpos(
                 return;
             }
 
-            for i in -1..=1 {
-                for j in -1..=1 {
-                    if !(i == 0 && j == 0) {
-                        // Skip the current block!
-                        let (nx, ny): (isize, isize) = (x as isize + i, y as isize + j);
-                        if nx >= 0 && nx < board.mx && ny >= 0 && ny < board.my {
-                            solveforpos(board, (nx, ny), &mut newcurr, solutions)
-                        }
-                    }
-                }
-            }
+            ndrange(0..3, 0..3)
+                .into_iter()
+                .map(|(i, j)|        ((i as isize) - 1, (j as isize) - 1))
+                .filter(|(i, j)|     ! ((*i == 0) && (*j == 0)))
+                .map(|(i, j)|        (x + i, y + j))
+                .filter(|(nx, ny)|   *nx >= 0 && *nx < board.mx && *ny >= 0 && *ny < board.my)
+                .for_each(|(nx, ny)| solveforpos(board, (nx, ny), &mut newcurr, solutions));
         }
     }
 }

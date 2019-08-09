@@ -16,6 +16,8 @@ mod trie;
 pub mod board;
 pub use board::Board;
 
+extern crate ndranges;
+
 #[cfg(feature = "large_board")]
 extern crate fsbitmap;
 #[cfg(feature = "large_board")]
@@ -49,9 +51,9 @@ pub use solve::solve;
 #[cfg(test)]
 mod tests {
     use super::*;
+    use dict::dict;
     #[cfg(feature = "slow_board")]
     use trie::Node;
-    use dict::dict;
 
     #[cfg(feature = "threaded")]
     use num_cpus;
@@ -169,17 +171,17 @@ mod tests {
             trie.insert(&mut std::iter::repeat('e').take(i))
         }
         let sample = sample_to_vecs(&[
-            &['e','e','e','e'],
-            &['e','e','e','e'],
-            &['e','e','e','e'],
-            &['e','e','e','e'],
+            &['e', 'e', 'e', 'e'],
+            &['e', 'e', 'e', 'e'],
+            &['e', 'e', 'e', 'e'],
+            &['e', 'e', 'e', 'e'],
         ]);
 
         let board = Board::new(sample, &trie).unwrap();
         let result = solve(&board);
         assert_eq!(result.len(), 14);
     }
-    
+
     #[cfg(feature = "slow_board")]
     #[cfg(feature = "threaded")]
     #[test]
@@ -189,17 +191,17 @@ mod tests {
             trie.insert(&mut std::iter::repeat('e').take(i))
         }
         let sample = sample_to_vecs(&[
-            &['e','e','e','e'],
-            &['e','e','e','e'],
-            &['e','e','e','e'],
-            &['e','e','e','e'],
+            &['e', 'e', 'e', 'e'],
+            &['e', 'e', 'e', 'e'],
+            &['e', 'e', 'e', 'e'],
+            &['e', 'e', 'e', 'e'],
         ]);
 
         let board = Board::new(sample, &trie).unwrap();
         let result = solve_mt(&board, num_cpus::get());
         assert_eq!(result.len(), 14);
     }
-    
+
     fn sample_to_vecs(arr: &[&[char]]) -> Vec<Vec<char>> {
         let mut res = Vec::new();
         for i in arr {

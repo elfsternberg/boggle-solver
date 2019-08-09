@@ -2,6 +2,7 @@ use crate::board::{solveforpos, Board, Scanned};
 use crate::Ledger;
 use crossbeam::thread::ScopedJoinHandle;
 use crossbeam_deque::{Injector, Steal, Worker};
+use ndranges::ndrange;
 use num_cpus;
 
 fn find_task<T>(local: &mut Worker<T>, global: &Injector<T>) -> Option<T> {
@@ -26,15 +27,15 @@ pub fn solve_mt(board: &Board, threads: usize) -> Vec<String> {
 
     let work = &{
         let work: Injector<Job> = Injector::new();
-        for x in 0..board.mx {
-            for y in 0..board.my {
+        ndrange(0..(board.mx as u64), 0..(board.my as u64))
+            .into_iter()
+            .for_each(|(x, y)| {
                 work.push(Job(
-                    x,
-                    y,
+                    x as isize,
+                    y as isize,
                     Scanned::new("".to_string(), Ledger::new(board.mx, board.my)),
-                ));
-            }
-        }
+                ))
+            });
         work
     };
 
@@ -66,7 +67,7 @@ pub fn solve_mt(board: &Board, threads: usize) -> Vec<String> {
                 })
             })
             .collect();
-        
+
         solutions = handles
             .into_iter()
             .map(|handle| handle.join().unwrap())
