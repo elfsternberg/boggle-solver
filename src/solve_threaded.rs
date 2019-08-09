@@ -66,7 +66,7 @@ pub fn solve_mt(board: &Board, threads: usize) -> Vec<String> {
                 })
             })
             .collect();
-
+        
         solutions = handles
             .into_iter()
             .map(|handle| handle.join().unwrap())

@@ -11,6 +11,8 @@ readme = "./README.md"
 [features]
 large_board = ["fsbitmap"]
 threaded = ["crossbeam", "crossbeam-deque", "num_cpus"]
+slow_board = []
+threaded_slow_board = []
 
 [dependencies]
 clap = "2.33.0"

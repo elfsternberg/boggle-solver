@@ -49,7 +49,12 @@ pub use solve::solve;
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(feature = "slow_board")]
+    use trie::Node;
     use dict::dict;
+
+    #[cfg(feature = "threaded")]
+    use num_cpus;
 
     #[test]
     fn sample_board() {
@@ -124,7 +129,7 @@ mod tests {
             "seen", "seer", "sneer", "yen", "yens", "yes",
         ]);
         let board = Board::new(sample, &trie).unwrap();
-        let mut result = solve_mt(&board, 2);
+        let mut result = solve_mt(&board, num_cpus::get());
         expected.sort();
         result.sort();
         assert_eq!(result, expected);
@@ -156,6 +161,45 @@ mod tests {
         assert_eq!(result.len(), 980);
     }
 
+    #[cfg(feature = "slow_board")]
+    #[test]
+    fn slow_board() {
+        let mut trie: Node<char> = Node::new();
+        for i in 1..=16 {
+            trie.insert(&mut std::iter::repeat('e').take(i))
+        }
+        let sample = sample_to_vecs(&[
+            &['e','e','e','e'],
+            &['e','e','e','e'],
+            &['e','e','e','e'],
+            &['e','e','e','e'],
+        ]);
+
+        let board = Board::new(sample, &trie).unwrap();
+        let result = solve(&board);
+        assert_eq!(result.len(), 14);
+    }
+    
+    #[cfg(feature = "slow_board")]
+    #[cfg(feature = "threaded")]
+    #[test]
+    fn threaded_slow_board() {
+        let mut trie: Node<char> = Node::new();
+        for i in 1..=16 {
+            trie.insert(&mut std::iter::repeat('e').take(i))
+        }
+        let sample = sample_to_vecs(&[
+            &['e','e','e','e'],
+            &['e','e','e','e'],
+            &['e','e','e','e'],
+            &['e','e','e','e'],
+        ]);
+
+        let board = Board::new(sample, &trie).unwrap();
+        let result = solve_mt(&board, num_cpus::get());
+        assert_eq!(result.len(), 14);
+    }
+    
     fn sample_to_vecs(arr: &[&[char]]) -> Vec<Vec<char>> {
         let mut res = Vec::new();
         for i in arr {
