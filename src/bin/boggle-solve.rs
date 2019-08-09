@@ -5,7 +5,7 @@ use boggle_solver::dict::dict;
 use boggle_solver::{solve, Board};
 
 use std::fs::File;
-use std::io::{BufRead, BufReader, Write};
+use std::io::{BufRead, BufReader};
 
 use clap::{App, Arg};
 use regex::Regex;
@@ -67,11 +67,7 @@ pub fn main() {
                     match found {
                         Some(c) => {
                             if !v.is_empty() && c != v.len() {
-                                writeln!(
-                                    std::io::stderr(),
-                                    "Boggle board rows must all be the same length"
-                                )
-                                .unwrap();
+                                eprintln!("Boggle board rows must all be the same length");
                                 std::process::exit(1);
                             }
                         }
@@ -84,7 +80,7 @@ pub fn main() {
                     }
                 }
                 Err(_) => {
-                    writeln!(std::io::stderr(), "Could not parse boggle board file").unwrap();
+                    eprintln!("Could not parse boggle board file");
                     std::process::exit(1);
                 }
             }

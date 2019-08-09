@@ -9,11 +9,8 @@ pub fn dict(path: &str) -> Node<char> {
     let f = BufReader::new(f);
 
     for line in f.lines() {
-        match line {
-            Ok(line) => {
-                trie.insert(&mut line.chars());
-            }
-            Err(_) => {}
+        if let Ok(line) = line {
+            trie.insert(&mut line.chars());
         }
     }
     trie

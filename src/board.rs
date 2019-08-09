@@ -102,10 +102,10 @@ fn innersolveforpos(
 
             ndrange(0..3, 0..3)
                 .into_iter()
-                .map(|(i, j)|        ((i as isize) - 1, (j as isize) - 1))
-                .filter(|(i, j)|     ! ((*i == 0) && (*j == 0)))
-                .map(|(i, j)|        (x + i, y + j))
-                .filter(|(nx, ny)|   *nx >= 0 && *nx < board.mx && *ny >= 0 && *ny < board.my)
+                .map(|(i, j)| ((i as isize) - 1, (j as isize) - 1))
+                .filter(|(i, j)| !((*i == 0) && (*j == 0)))
+                .map(|(i, j)| (x + i, y + j))
+                .filter(|(nx, ny)| *nx >= 0 && *nx < board.mx && *ny >= 0 && *ny < board.my)
                 .for_each(|(nx, ny)| solveforpos(board, (nx, ny), &mut newcurr, solutions));
         }
     }

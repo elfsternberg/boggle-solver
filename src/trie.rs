@@ -29,6 +29,7 @@ use std::sync::RwLock;
 /// whole word, but the hashmap would then contain 'a', 'e', and 's',
 /// for 'oriental', 'oriented', and 'orients'.
 
+#[derive(Default)]
 pub struct Node<C>(HashMap<C, Box<RwLock<Node<C>>>>, bool)
 where
     C: Copy + Hash + Eq;
