@@ -55,7 +55,7 @@ A standalone binary is generated during the build.  Basic usage is:
 
 `boggle [-d <path to dictionary>] <board_file>`
 
-The program defaults to /usr/share/dict/words if no dictionary is
+The program defaults to `/usr/share/dict/words` if no dictionary is
 specified. 
 
 The format for a board file is straightforward.  It's a text file,
@@ -113,8 +113,9 @@ Like this one, it's a library with a standalone binary.
 The binary is <s>ridiculously</s> now slightly less primitive.  Here's
 the love it still needs:
 
-- The parser should forbid non-alphabet and mixed-alphabet inputs
 - The parser should take STDIN as an option
+- The documentation isn't being generated correctly
+- Replace the nested `for` loops with an iterator construct
 
 I would be tempted to do a Haskell version, but there's a *lot* of
 mutation in this.  I need to think harder, and practice more Haskell,
