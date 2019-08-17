@@ -1,0 +1,20 @@
+digraph trie {
+	rankdir=LR;
+	node [shape=circle];
+	n1 [shape=doublecircle, label="n"];
+	n2 [label="n"];
+	t1 [label="t", shape=doublecircle];
+	t2 [label="t", shape=doublecircle];
+	t3 [label="t", shape=doublecircle];
+	a1 [shape=doublecircle, label="a"];
+
+	"" -> a1;
+	a1 -> "r";
+	a1 -> n1;
+	a1 -> "u";
+	"u" -> n2;
+	n2 -> t1;
+	"r" -> t2;
+	n1 -> t3;
+}
+	
