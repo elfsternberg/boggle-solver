@@ -33,7 +33,7 @@ non-terminating node, the search fails.
 
 The rules of Boggle™ are very simple: on a 4x4 grid, sixteen die are
 shaken and dropped into place.  Each die has six letters on it,
-probabistically arranged.  Players have three minutes to find every
+probabilistically arranged.  Players have three minutes to find every
 valid word on the board, and "valid" means "found in the dictionary the
 players have agreed to use," modulo some rules like "no contractions or
 abbreviations."
@@ -41,7 +41,7 @@ abbreviations."
 So, we need a trie for our dictionary.  Tries are extremely fast, Ο(n)
 where `n` is the length of the word.  They're memory-intensive, but
 these days memory is cheaper than time.  Each node has two conditions:
-the list of letters that it leads to, and whether or not its a terminal
+the list of letters that it leads to, and whether or not it's a terminal
 node.  For the "list of letters," we're going to use a HashMap.  The
 child nodes must be boxed as we're building this on the heap (it will be
 *huge* for a full-sized dictionary) and it must be RefCell'd because
@@ -71,7 +71,7 @@ Note that we're returning from this function if we're a
 terminator. There is no character to insert into the next node.
 
 If we're not a terminator, we must then either access or create a child
-node, and then keep traversing the word until its exhausted.  In the
+node, and then keep traversing the word until it's exhausted.  In the
 "create a new child" scenario, we create the full trie before inserting
 it.
 ```
@@ -106,7 +106,7 @@ the word is exhausted but the trie is not, this is a prefix, regardless
 of its terminator status.
 
 So, our search feature will be a recursive function that, letter by
-letter, transits the trie node by node.  If the word exhausts and we're
+letter, visits the trie node by node.  If the word exhausts and we're
 still in the trie, we check the end state (always `true` for a prefix,
 `is a terminator` for a word), otherwise we recurse down to the next
 letter and the next node.
