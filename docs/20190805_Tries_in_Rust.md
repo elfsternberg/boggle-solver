@@ -5,9 +5,9 @@ until I got home that I remembered "Dammit, the fastest structure for
 checking if a word is in a dictionary is a *trie*!"
 
 Whiteboard exercises are terrible. I don't think I've ever actually
-programmed a trie, not even in Data Structures class I took way back in
-college in 19mumblemumble.  I'm sure I've used them, but I've never had
-to write one. 
+programmed a trie, not even in the Data Structures class I took way back
+in college in 19mumblemumble.  I'm sure I've used them, but I've never
+had to write one.
 
 ## So what is a trie?
 
