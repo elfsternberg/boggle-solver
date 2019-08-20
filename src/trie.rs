@@ -48,7 +48,7 @@ where
     /// nodes with the rest of the iterator after processing the
     /// letter given.  If there is no letter, this node is marked as a
     /// terminator ("yes, that is a word") and processing ends.
-    pub fn insert(&mut self, word: &mut Iterator<Item = C>) {
+    pub fn insert(&mut self, word: &mut dyn Iterator<Item = C>) {
         let c = match word.next() {
             None => {
                 self.1 = true;
@@ -75,7 +75,7 @@ where
     /// node a word node?"  But for pref(), which only tells you if
     /// the prefix xists, the endstate is "does this node exist at
     /// all?"
-    fn search(&self, word: &mut Iterator<Item = C>, endstate: &Fn(&Node<C>) -> bool) -> bool {
+    fn search(&self, word: &mut dyn Iterator<Item = C>, endstate: &dyn Fn(&Node<C>) -> bool) -> bool {
         let c = match word.next() {
             None => return endstate(self),
             Some(c) => c,
@@ -95,14 +95,14 @@ where
     /// says "if, when you're out of letters in the sample string,
     /// the node you're on has its bool set to true, it is a whole
     /// word found in the dictionary."
-    pub fn find(&self, word: &mut Iterator<Item = C>) -> bool {
+    pub fn find(&self, word: &mut dyn Iterator<Item = C>) -> bool {
         self.search(word, &|s| s.1)
     }
 
     /// Determine if the word is in the trie, or is the prefix of a word
     /// in the trie.  All that matters here is that we're still in the
     /// trie when we run out of letters.
-    pub fn pref(&self, word: &mut Iterator<Item = C>) -> bool {
+    pub fn pref(&self, word: &mut dyn Iterator<Item = C>) -> bool {
         self.search(word, &|_s| true)
     }
 }

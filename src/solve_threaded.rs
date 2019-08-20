@@ -55,13 +55,8 @@ pub fn solve_mt(board: &Board, threads: usize) -> Vec<String> {
                 spawner.spawn(move |_| {
                     let mut solutions: Vec<String> = vec![];
                     let mut queue: Worker<Job> = Worker::new_fifo();
-                    loop {
-                        match find_task(&mut queue, &work) {
-                            Some(mut job) => {
-                                solveforpos(&board, (job.0, job.1), &mut job.2, &mut solutions);
-                            }
-                            None => break,
-                        }
+                    while let Some(mut job) = find_task(&mut queue, &work) {
+                        solveforpos(&board, (job.0, job.1), &mut job.2, &mut solutions);
                     }
                     solutions
                 })

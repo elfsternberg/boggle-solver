@@ -90,7 +90,7 @@ fn innersolveforpos(
     skip_pos_check: bool,
 ) {
     match curr.add(c, (x, y), skip_pos_check) {
-        None => return,
+        None => (),
         Some(mut newcurr) => {
             if newcurr.0.len() > 2 && board.words.find(&mut newcurr.0.chars()) {
                 solutions.push(newcurr.0.to_string());
