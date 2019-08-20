@@ -1,0 +1,18 @@
+[package]
+name = "boggle-solver-ffi"
+version = "0.1.0"
+authors = ["Elf M. Sternberg <elf.sternberg@gmail.com>"]
+edition = "2018"
+license = "MPL-2.0+"
+description = "C FFI for Boggle™ Automatic Solver"
+repository = "https://github.com/elfsternberg/boggle-solver"
+readme = "./README.md"
+
+[dependencies]
+boggle-solver = { path = "../" }
+regex = "1"
+libc = "0.2.62"
+
+[lib]
+name = "boggle_solver"
+crate-type = ["staticlib", "cdylib"]

@@ -31,7 +31,7 @@ name = "perf1"
 harness = false
 
 [profile.release]
-debug = false
+debug = true
 
 [lib]
 name = "boggle_solver"

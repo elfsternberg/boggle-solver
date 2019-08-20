@@ -11,7 +11,7 @@ pub mod dict;
 /// to find as many valid words as they can (valid according to the
 /// dictionary of choice (Americans typically use either Webster's or
 /// the Scrabble North American dictionary).
-mod trie;
+pub mod trie;
 
 pub mod board;
 pub use board::Board;
