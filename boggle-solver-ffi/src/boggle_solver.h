@@ -2,7 +2,6 @@
 #define _BOGGLE_SOLVER_DEF_
 #endif
 
-#include <stdint.h>
 #include <stdlib.h>
 
 struct Trie;
@@ -25,4 +24,4 @@ void dictionary_destroy(struct Trie* trie);
 // Plan accordingly.
 
 void solve_for_dictionary(char* board_text, struct Trie* dictionary, char* buffer);
-void solve(char* board_test, char* dictionary_filepath, char* buffer);
+void solve(char* board_text, char* dictionary_filepath, char* buffer);

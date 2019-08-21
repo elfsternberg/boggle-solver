@@ -32,6 +32,6 @@ int main (int argc, char** argv) {
   fclose(fp);
 
   solve(board, "/usr/share/dict/words", buffer);
-  printf("%s", buffer);
+  printf("%s\n", buffer);
   return 0;
 }

@@ -8,3 +8,4 @@ Cargo.lock
 **/*.rs.bk
 target
 example/csolve
+python/build
