@@ -24,10 +24,10 @@ fn cli_no_args() {
 #[test]
 fn cli_small_board() {
     let mut board = NamedTempFile::new().unwrap();
-    write!(board, "an\ntd\n").unwrap();
+    write!(board, "an\utd\n").unwrap();
     Command::cargo_bin("boggle-solve")
         .unwrap()
         .args(&[board.path()])
         .assert()
-        .stdout(contains("tan"));
+        .stdout(contains("aunt"));
 }
