@@ -1,13 +1,23 @@
+#![deny(missing_docs)]
+
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+//! Boggle solver: Main function
+//!
+//! Given a board and a dictionary, create a work queue and
+//! solve for each position documented in the queue.
+
 use crate::board::{solveforpos, Board, Scanned};
 use crate::Ledger;
-use ndranges::ndrange;
+use itertools::iproduct;
 
 /// Solve the Boggle board
 ///
 pub fn solve(board: &Board) -> Vec<String> {
     let mut work: Vec<(isize, isize, Scanned, Vec<String>)> =
-        ndrange(0..(board.mx as u64), 0..(board.my as u64))
-            .into_iter()
+        iproduct!(0..(board.mx as u64), 0..(board.my as u64))
             .map(|(x, y)| {
                 (
                     x as isize,

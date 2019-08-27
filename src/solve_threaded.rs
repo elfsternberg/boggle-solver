@@ -1,8 +1,20 @@
+#![deny(missing_docs)]
+
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+//! Boggle solver: Main function
+//!
+//! Given a board and a dictionary, create a work queue and
+//! solve for each position documented in the queue.
+
 use crate::board::{solveforpos, Board, Scanned};
 use crate::Ledger;
 use crossbeam::thread::ScopedJoinHandle;
 use crossbeam_deque::{Injector, Steal, Worker};
-use ndranges::ndrange;
+use itertools::iproduct;
+
 use num_cpus;
 
 fn find_task<T>(local: &mut Worker<T>, global: &Injector<T>) -> Option<T> {
@@ -27,7 +39,7 @@ pub fn solve_mt(board: &Board, threads: usize) -> Vec<String> {
 
     let work = &{
         let work: Injector<Job> = Injector::new();
-        ndrange(0..(board.mx as u64), 0..(board.my as u64))
+        iproduct!(0..(board.mx as u64), 0..(board.my as u64))
             .into_iter()
             .for_each(|(x, y)| {
                 work.push(Job(

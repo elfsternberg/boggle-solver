@@ -1,9 +1,12 @@
+#![deny(missing_docs)]
+
+//! An aggregating structure for scanning a Boggle! board.
+
 use crate::trie::Node;
 use crate::Ledger;
-use ndranges::ndrange;
+use itertools::iproduct;
 
-/// An aggregating structure for scanning the board.
-///
+
 pub(in crate) struct Scanned(String, Ledger);
 
 impl Scanned {
@@ -100,9 +103,7 @@ fn innersolveforpos(
                 return;
             }
 
-            ndrange(0..3, 0..3)
-                .into_iter()
-                .map(|(i, j)| ((i as isize) - 1, (j as isize) - 1))
+            iproduct!(-1..=1, -1..=1)
                 .filter(|(i, j)| !((*i == 0) && (*j == 0)))
                 .map(|(i, j)| (x + i, y + j))
                 .filter(|(nx, ny)| *nx >= 0 && *nx < board.mx && *ny >= 0 && *ny < board.my)

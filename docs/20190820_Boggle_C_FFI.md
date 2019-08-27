@@ -52,14 +52,14 @@ I'm about to show you.  This is C-land, where C-things happen and
 [C-corruption](https://www.youtube.com/watch?v=BL2Enp8d1Zk) is the order
 of the day.
 
-In the original boggle-solver, there is a function, `dict(path: &str) ->
+In the original boggle-solver there is a function, `dict(path: &str) ->
 Node<char>` that takes a path to a dictionary file and returns a fully
 populated trie.  We're going to use that function, wrap the results in
 an [opaque pointer](https://www.geeksforgeeks.org/opaque-pointer/) (a
 pointer the C programmer shouldn't examine internally), and return that
 pointer.  That pointer has to be taken away from Rust's type handler.
 Rust needs to not worry about it, not borrow check it. It is a sinful
-object, lost to the world of C.  The Rust function `transmute` does
+object lost to the world of C.  The Rust function `transmute` does
 this:
 ```
 #[no_mangle]
@@ -71,14 +71,15 @@ unsafe extern "C" fn dictionary_make(filepath: *const c_char) -> *const Trie {
 ```
 This function is marked `unsafe`, which is fine because only C-side
 programs will ever call it. Inside, we take the filepath, which is an
-array of bytes terminated by a null, and cast it to a string, then pass
-that to our dictionary, wrap that in the new `Trie` struct, `Box` it up,
-and then `transmute` that box into our C-like pointer. Phew!
+array of bytes terminated by a null, and cast it to a Rust string, then
+pass that to our dictionary builder, wrap the newly made dictionary in
+the new `Trie` struct, `Box` it up, and then `transmute` that box into
+our C-like pointer. Phew!
 
-We are back in the land of C, and now we're responsible for freeing the
-dictionary when we're done with it.  Perhaps most miraculously, we can
-get away with this by using `transmute` to hand it back to Rust, put it
-into a scope, and then... just let Rust drop it and recover the memory.
+Since we are back in the land of C we are responsible for freeing the
+dictionary when we're done with it.  Miraculously, we can get away with
+this by using `transmute` to hand it back to Rust, put it into a scope,
+and then... just let Rust drop it and recover the memory.
 ```
 #[no_mangle]
 unsafe extern "C" fn dictionary_destroy(trie: *const Trie) {
@@ -89,16 +90,15 @@ Now *that* is Rust black magic!
 
 We can now solve a board for a given dictionary.  I won't copy the
 entire text of the `boggle-solve` binary here, which makes up the bulk
-of this function.  At the end of that function, we had a `Vec<String>`
-of all the words found on the board, which was the return type of the
-function.  In our current case, we need to return something C
-understands.
+of this function.  At the end of that function, we had a vector of all
+the words found on the board, which was the return type of the function.
+In our current case, we need to return something C understands.
 
 Traditionally, the way C does this is to allocate a buffer big enough to
 hold the results, pass that buffer to the function (as a pointer), and
 then expect the buffer to be full when the results come back.
 
-Here, we take the `solutions: Vec<String>`, and just create a massive
+Here, we take the `solutions: Vec<String>` and from it create a massive
 string of all the results separated by newlines (to make it printable).
 We cast that string into C, and copy the results into the buffer.  This
 isn't the world's most efficient example; at one point, we have *three
@@ -205,3 +205,16 @@ wore
 wren
 wrier
 ```
+So now we have boggle-solver, the C-land version. The binary isn't even
+very large (about 8K on my Linux box), but everything is dynamically
+linked so, in the end, it's a big executable, hauling the entire Rust
+runtime with it.
+
+Still, this is a pretty good demonstration of what's possible.  It's
+not a *great* demonstration; in that case, I'd replace the call to
+`dict` with something which could take arrays of strings, or maybe even
+a file pointer, and do magic with it inside of Rust.  But this
+accomplishes the initial goal: get something that can be run from a C
+program and run the Boggle Solver.
+
+Next: Go one step further, and make it work in Python.

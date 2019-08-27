@@ -1,22 +1,25 @@
+#![deny(missing_docs)]
+
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+//! Boggle solver
+//!
+//! The readme has more, but Boggle is a popular game released in 1972
+//! in which a collection of 16 dice with letters printed on the sides
+//! are tossed into a 4⨯4 grid and then the players have three minutes
+//! to find as many valid words as they can (valid according to the
+//! dictionary of choice (Americans typically use either Webster's or
+//! the Scrabble North American dictionary).
+
 pub mod dict;
-/// Boggle solver
-///
-/// The readme has more, but Boggle is a popular game released in 1972
-/// in which a collection of 16 dice with letters printed on the sides
-/// are tossed into a 4⨯4 grid and then the players have three minutes
-/// to find as many valid words as they can (valid according to the
-/// dictionary of choice (Americans typically use either Webster's or
-/// the Scrabble North American dictionary).
 pub mod trie;
 
 pub mod board;
 pub use board::Board;
 
-extern crate ndranges;
+extern crate itertools;
 
 #[cfg(feature = "large_board")]
 extern crate fsbitmap;
