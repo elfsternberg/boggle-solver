@@ -1,3 +1,4 @@
+use assert_cmd::cargo;
 use assert_cmd::prelude::*;
 use predicates::str::contains;
 use std::io::Write;
@@ -7,10 +8,13 @@ use tempfile::NamedTempFile;
 // Note to self: The env!() there is obviously the environment set by
 // `cargo test`, and not anything weird coming out of stdout.
 
+fn runexec() -> Command {
+    Command::new(cargo::cargo_bin!("boggle-solve"))
+}
+
 #[test]
 fn cli_version() {
-    Command::cargo_bin("boggle-solve")
-        .unwrap()
+    runexec()
         .args(&["-V"])
         .assert()
         .stdout(contains(env!("CARGO_PKG_VERSION")));
@@ -18,10 +22,7 @@ fn cli_version() {
 
 #[test]
 fn cli_no_args() {
-    Command::cargo_bin("boggle-solve")
-        .unwrap()
-        .assert()
-        .failure();
+    runexec().assert().failure();
 }
 
 #[test]
@@ -35,9 +36,5 @@ fn cli_small_board_custom_dict() {
         "--dict",
         dict.path().to_str().unwrap(),
     ];
-    Command::cargo_bin("boggle-solve")
-        .unwrap()
-        .args(&args)
-        .assert()
-        .stdout(contains("aunt"));
+    runexec().args(&args).assert().stdout(contains("aunt"));
 }
