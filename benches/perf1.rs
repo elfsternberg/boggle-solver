@@ -1,11 +1,11 @@
 #[macro_use]
 extern crate criterion;
 
-use criterion::black_box;
 use criterion::Criterion;
+use criterion::black_box;
 
 use boggle_solver::dict::dict;
-use boggle_solver::{solve, solve_mt, Board};
+use boggle_solver::{Board, solve, solve_mt};
 
 fn sample_to_vecs(arr: &[&[char]]) -> Vec<Vec<char>> {
     let mut res = Vec::new();

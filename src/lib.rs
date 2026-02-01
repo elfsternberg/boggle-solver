@@ -1,5 +1,4 @@
 #![deny(missing_docs)]
-
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -85,19 +84,20 @@ mod tests {
 
         let board = Board::new(sample, &trie).unwrap();
         let mut expected = result_to_vec(&[
-            "ape", "apt", "apter", "ate", "cheep", "cheer", "chi", "chin", "chirp", "deed", "deem",
-            "deep", "deer", "den", "denier", "dent", "dented", "deter", "eat", "eaten", "eater",
-            "edema", "eel", "end", "ended", "enrich", "enriched", "enter", "eta", "heed", "held",
-            "hen", "hie", "hind", "hint", "hinted", "hire", "inch", "inched", "indeed", "inept",
-            "inter", "ire", "led", "lee", "leer", "lend", "lent", "let", "map", "mat", "mate",
-            "mated", "meat", "meddle", "meet", "met", "mete", "meted", "meteor", "meteoric",
-            "meter", "neat", "need", "net", "niche", "open", "opened", "opt", "opted", "ore",
-            "orient", "oriented", "pat", "pate", "pea", "peat", "pee", "peed", "peel", "pen",
-            "pended", "pent", "per", "pet", "poet", "pore", "porn", "preen", "preteen", "pretend",
-            "print", "printed", "pro", "ream", "reamed", "reap", "reed", "reel", "rein", "reined",
-            "rend", "rent", "rented", "rep", "rich", "rind", "roe", "rope", "tam", "tame", "tamed",
-            "tap", "tape", "taper", "tea", "team", "teamed", "tee", "teed", "teem", "teen",
-            "teenier", "ten", "tend", "tended", "tern",
+            "amt", "ape", "apt", "apter", "ate", "cheep", "cheer", "chi", "chin", "chirp", "deed",
+            "deem", "deep", "deer", "den", "denier", "dent", "dented", "deter", "eat", "eaten",
+            "eater", "edema", "eel", "end", "ended", "enrich", "enriched", "enter", "eta", "heed",
+            "held", "hen", "hie", "hind", "hint", "hinted", "hire", "inc", "inch", "inched", "ind",
+            "indeed", "inept", "int", "intel", "inter", "ire", "led", "lee", "leer", "lend",
+            "lent", "let", "map", "mat", "mate", "mated", "meat", "med", "meddle", "meet", "met",
+            "meta", "mete", "meted", "meteor", "meteoric", "meter", "neat", "need", "net", "niche",
+            "open", "opened", "opt", "opted", "ore", "orient", "oriented", "pat", "pate", "pea",
+            "peat", "pee", "peed", "peel", "pen", "pend", "pended", "pent", "per", "pet", "poet",
+            "pore", "porn", "preen", "preteen", "pretend", "print", "printed", "pro", "ream",
+            "reamed", "reap", "reed", "reel", "rein", "reined", "rend", "rent", "rented", "rep",
+            "rich", "rind", "roe", "rope", "tam", "tame", "tamed", "tap", "tape", "taper", "tea",
+            "team", "teamed", "tee", "teed", "teem", "teen", "teenier", "tel", "ten", "tend",
+            "tended", "tern",
         ]);
         let mut result = solve(&board);
         expected.sort();
@@ -110,8 +110,8 @@ mod tests {
         let trie = dict("/usr/share/dict/words");
         let sample = sample_to_vecs(&[&['q', 'u', 'e'], &['e', 'e', 'y'], &['n', 's', 'r']]);
         let mut expected = result_to_vec(&[
-            "eery", "eye", "eyes", "queen", "queens", "queer", "queers", "query", "rye", "see",
-            "seen", "seer", "sneer", "yen", "yens", "yes",
+            "eery", "eye", "eyes", "queen", "queens", "queer", "queers", "query", "ques", "rye",
+            "see", "seen", "seer", "sneer", "yen", "yens", "yes", "yrs",
         ]);
         let board = Board::new(sample, &trie).unwrap();
         let mut result = solve(&board);
@@ -224,5 +224,4 @@ mod tests {
         }
         res
     }
-
 }

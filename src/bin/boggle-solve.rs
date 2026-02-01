@@ -2,7 +2,7 @@ extern crate clap;
 extern crate regex;
 
 use boggle_solver::dict::dict;
-use boggle_solver::{solve, Board};
+use boggle_solver::{Board, solve};
 
 use std::fs::File;
 use std::io::{BufRead, BufReader};

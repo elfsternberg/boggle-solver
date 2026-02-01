@@ -1,5 +1,4 @@
 #![deny(missing_docs)]
-
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -9,8 +8,8 @@
 //! Given a board and a dictionary, create a work queue and
 //! solve for each position documented in the queue.
 
-use crate::board::{solveforpos, Board, Scanned};
 use crate::Ledger;
+use crate::board::{Board, Scanned, solveforpos};
 use crossbeam::thread::ScopedJoinHandle;
 use crossbeam_deque::{Injector, Steal, Worker};
 use itertools::iproduct;

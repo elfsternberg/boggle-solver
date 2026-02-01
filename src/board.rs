@@ -2,12 +2,11 @@
 
 //! An aggregating structure for scanning a Boggle! board.
 
-use crate::trie::Node;
 use crate::Ledger;
+use crate::trie::Node;
 use itertools::iproduct;
 
-
-pub(in crate) struct Scanned(String, Ledger);
+pub(crate) struct Scanned(String, Ledger);
 
 impl Scanned {
     pub fn new(word: String, positions: Ledger) -> Scanned {
@@ -48,7 +47,7 @@ pub struct Board<'a> {
 impl<'a> Board<'a> {
     /// Takes an n⨯m board of char, and a dictionary, and returns
     /// a new Board waiting to be solved.
-    pub fn new(board: Vec<Vec<char>>, words: &Node<char>) -> Option<Board> {
+    pub fn new(board: Vec<Vec<char>>, words: &Node<char>) -> Option<Board<'_>> {
         if board.is_empty() {
             return None;
         }
@@ -71,7 +70,7 @@ impl<'a> Board<'a> {
     }
 }
 
-pub(in crate) fn solveforpos(
+pub(crate) fn solveforpos(
     board: &Board,
     (x, y): (isize, isize),
     curr: &mut Scanned,
