@@ -13,6 +13,7 @@ use crate::board::{Board, Scanned, solveforpos};
 use crossbeam::thread::ScopedJoinHandle;
 use crossbeam_deque::{Injector, Steal, Worker};
 use itertools::iproduct;
+use std::collections::HashSet;
 
 use num_cpus;
 
@@ -59,15 +60,21 @@ pub fn solve_mt(board: &Board, threads: usize) -> Vec<String> {
     // map waits for that to finish before spawning the other threads.  By
     // using collect(), we force map out of laziness and into eagerness, and
     // generate the threads before starting the work.
-    let mut solutions: Vec<String> = vec![];
+    let mut solutions: HashSet<String> = HashSet::new();
     crossbeam::scope(|spawner| {
-        let handles: Vec<ScopedJoinHandle<Vec<String>>> = (0..threads)
+        let handles: Vec<ScopedJoinHandle<HashSet<String>>> = (0..threads)
             .map(|_| {
                 spawner.spawn(move |_| {
-                    let mut solutions: Vec<String> = vec![];
+                    let mut solutions: HashSet<String> = HashSet::new();
                     let mut queue: Worker<Job> = Worker::new_fifo();
                     while let Some(mut job) = find_task(&mut queue, &work) {
-                        solveforpos(&board, (job.0, job.1), &mut job.2, &mut solutions);
+                        solveforpos(
+                            &board,
+                            (job.0, job.1),
+                            &mut job.2,
+                            &board.words,
+                            &mut solutions,
+                        );
                     }
                     solutions
                 })
@@ -82,8 +89,8 @@ pub fn solve_mt(board: &Board, threads: usize) -> Vec<String> {
     })
     .unwrap();
 
+    let mut solutions: Vec<String> = solutions.into_iter().collect();
     solutions.sort();
-    solutions.dedup();
     solutions
 }
 

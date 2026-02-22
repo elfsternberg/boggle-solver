@@ -18,19 +18,29 @@ use regex::Regex;
     about = "Boggle™ solver written in Rust"
 )]
 struct Cli {
+    /// The Boggle board you want to analyze
     board: String,
 
+    /// Path to the dictionary
     #[arg(short, long, default_value = "/usr/share/dict/words")]
     dict: String,
 
+    /// Tally and show the total score
     #[arg(short, long)]
     score: bool,
 }
 
 fn main() {
-    let matches = Cli::parse();
-    let dpath = &matches.dict;
-    let bpath = &matches.board;
+    let cli = Cli::try_parse().unwrap_or_else(|e| match e.kind() {
+        clap::error::ErrorKind::MissingRequiredArgument => {
+            eprintln!("A Boggle board is required");
+            std::process::exit(1);
+        }
+        _ => e.exit(),
+    });
+
+    let dpath = &cli.dict;
+    let bpath = &cli.board;
     let trie = dict(dpath);
 
     let board = {
@@ -81,7 +91,7 @@ fn main() {
     let board = Board::new(board, &trie).unwrap();
     let solutions = solve(&board);
 
-    if matches.score {
+    if cli.score {
         let mut tally = 0;
         for s in solutions {
             let score = match s.len() {

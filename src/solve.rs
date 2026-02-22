@@ -11,18 +11,19 @@
 use crate::Ledger;
 use crate::board::{Board, Scanned, solveforpos};
 use itertools::iproduct;
+use std::collections::HashSet;
 
 /// Solve the Boggle board
 ///
 pub fn solve(board: &Board) -> Vec<String> {
-    let mut work: Vec<(isize, isize, Scanned, Vec<String>)> =
+    let mut work: Vec<(isize, isize, Scanned, HashSet<String>)> =
         iproduct!(0..(board.mx as u64), 0..(board.my as u64))
             .map(|(x, y)| {
                 (
                     x as isize,
                     y as isize,
                     Scanned::new("".to_string(), Ledger::new(board.mx, board.my)),
-                    vec![],
+                    HashSet::new(),
                 )
             })
             .collect();
@@ -32,15 +33,15 @@ pub fn solve(board: &Board) -> Vec<String> {
         // independently run in a worker, and the results collated
         // together afterward.  This is the first step toward
         // map/reducing the solver.
-        solveforpos(&board, (job.0, job.1), &mut job.2, &mut job.3);
+        solveforpos(&board, (job.0, job.1), &mut job.2, &board.words, &mut job.3);
     }
 
-    let mut solutions: Vec<String> = vec![];
+    let mut solutions: HashSet<String> = HashSet::new();
     for job in &mut work {
         solutions.extend(job.3.iter().cloned())
     }
 
+    let mut solutions: Vec<String> = solutions.into_iter().collect();
     solutions.sort();
-    solutions.dedup();
     solutions
 }

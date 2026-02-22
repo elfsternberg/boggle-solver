@@ -2,9 +2,19 @@
 
 //! An aggregating structure for scanning a Boggle! board.
 
+use std::collections::HashSet;
+
 use crate::Ledger;
 use crate::trie::Node;
 use itertools::iproduct;
+use lazy_static::lazy_static;
+
+lazy_static! {
+static ref POSITIONS: Vec<(isize, isize)> = iproduct!(-1..=1, -1..=1)
+    // Skip the center position; we just want neighbors
+        .filter(|(i, j)| !((*i == 0) && (*j == 0)))
+        .collect();
+}
 
 pub(crate) struct Scanned(String, Ledger);
 
@@ -37,7 +47,8 @@ impl Scanned {
 ///
 pub struct Board<'a> {
     board: Vec<Vec<char>>,
-    words: &'a Node<char>,
+    /// The dictionary of words, in trie form
+    pub words: &'a Node<char>,
     #[doc(hidden)]
     pub mx: isize,
     #[doc(hidden)]
@@ -70,43 +81,62 @@ impl<'a> Board<'a> {
     }
 }
 
-pub(crate) fn solveforpos(
-    board: &Board,
+// Given:
+// A board
+// A position on the board
+// A ledger of visited positions
+// The current dictionary location
+// The current collection of solutions
+
+// 1. Find the position on the board.  If it has been visited, stop
+// 2. Get the letter at that position.  Check the dictionary for "this is a valid letter from the current position in the dictionary."  If it is not, stop.
+// 3. Append the letter to the current solution.  If the dictionary says this creates a word, record it.
+// 4. For every valid position around the current one, attempt to recurse into it.
+
+pub(crate) fn solveforpos<'a>(
+    board: &Board<'a>,
     (x, y): (isize, isize),
-    curr: &mut Scanned,
-    solutions: &mut Vec<String>,
+    ledger: &mut Scanned,
+    dictionary: &'a Node<char>,
+    solutions: &mut HashSet<String>,
 ) {
     let c = board.board[x as usize][y as usize];
-    innersolveforpos(c, board, (x, y), curr, solutions, false);
-    if c == 'q' {
-        innersolveforpos('u', board, (x, y), curr, solutions, true);
+    if let Some(dictionary) = dictionary.0.get(&c) {
+        innersolveforpos(c, board, (x, y), ledger, dictionary, solutions, false);
+        if c == 'q' {
+            if let Some(dictionary) = dictionary.0.get(&'u') {
+                innersolveforpos('u', board, (x, y), ledger, dictionary, solutions, true);
+            }
+        }
     }
 }
 
-fn innersolveforpos(
+fn innersolveforpos<'a>(
     c: char,
-    board: &Board,
+    board: &Board<'a>,
     (x, y): (isize, isize),
-    curr: &mut Scanned,
-    solutions: &mut Vec<String>,
+    ledger: &mut Scanned,
+    dictionary: &'a Node<char>,
+    solutions: &mut HashSet<String>,
     skip_pos_check: bool,
 ) {
-    match curr.add(c, (x, y), skip_pos_check) {
+    match ledger.add(c, (x, y), skip_pos_check) {
         None => (),
-        Some(mut newcurr) => {
-            if newcurr.0.len() > 2 && board.words.find(&mut newcurr.0.chars()) {
-                solutions.push(newcurr.0.to_string());
+        Some(mut ledger) => {
+            if ledger.0.len() > 2 && dictionary.1 {
+                solutions.insert(ledger.0.to_string());
             }
 
-            if !board.words.pref(&mut newcurr.0.chars()) {
+            if dictionary.0.is_empty() {
                 return;
             }
 
-            iproduct!(-1..=1, -1..=1)
-                .filter(|(i, j)| !((*i == 0) && (*j == 0)))
-                .map(|(i, j)| (x + i, y + j))
-                .filter(|(nx, ny)| *nx >= 0 && *nx < board.mx && *ny >= 0 && *ny < board.my)
-                .for_each(|(nx, ny)| solveforpos(board, (nx, ny), &mut newcurr, solutions));
+            for (i, j) in POSITIONS.iter() {
+                let (nx, ny) = (x + i, y + j);
+                if nx >= 0 && nx < board.mx && ny >= 0 && ny < board.my {
+                    solveforpos(board, (nx, ny), &mut ledger, dictionary, solutions);
+                }
+            }
         }
     }
 }
