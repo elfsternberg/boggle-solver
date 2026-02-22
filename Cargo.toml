@@ -15,13 +15,13 @@ slow_board = []
 
 [dependencies]
 itertools = "0.14.0"
-clap = "2.33.0"
 regex = "1"
 
 fsbitmap = { version = "0.1.0", git = "https://github.com/elfsternberg/fsbitmap-rs", optional = true }
 crossbeam = { version = "0.8.4", optional = true }
 crossbeam-deque = { version = "0.8.6", optional = true }
 num_cpus = { version = "1.10.1", optional = true }
+clap = { version = "4.5.60", features = ["derive"] }
 
 [dev-dependencies]
 tempfile = "3.0.7"

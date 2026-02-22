@@ -30,7 +30,7 @@ use std::hash::Hash;
 /// for 'oriental', 'oriented', and 'orients'.
 ///
 #[derive(Default)]
-pub struct Node<C>(HashMap<C, Box<Node<C>>>, bool)
+pub struct Node<C>(pub HashMap<C, Box<Node<C>>>, pub bool)
 where
     C: Copy + Hash + Eq;
 

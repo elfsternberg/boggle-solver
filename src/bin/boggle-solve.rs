@@ -7,40 +7,30 @@ use boggle_solver::{Board, solve};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
-use clap::{App, Arg};
+use clap::Parser;
 use regex::Regex;
 
-fn main() {
-    let matches = App::new("solveboggle")
-        .version("0.1.0")
-        .author("Elf M. Sternberg <elf.sternberg@gmail.com>")
-        .about("Boggle™ solver written in Rust")
-        .arg(
-            Arg::with_name("BOARD")
-                .help("The Boggle board to analyze")
-                .required(true)
-                .index(1),
-        )
-        .arg(
-            Arg::with_name("dict")
-                .required(false)
-                .long("dict")
-                .short("d")
-                .default_value("/usr/share/dict/words")
-                .takes_value(true)
-                .help("Dictionary to use"),
-        )
-        .arg(
-            Arg::with_name("score")
-                .required(false)
-                .long("score")
-                .short("s")
-                .help("Tally up total score"),
-        )
-        .get_matches();
+#[derive(Parser)]
+#[command(
+    name = "bogglesolve",
+    version = "0.1.0",
+    author = "Elf M. Sternberg <elf.sternberg@gmail.com>",
+    about = "Boggle™ solver written in Rust"
+)]
+struct Cli {
+    board: String,
 
-    let dpath = matches.value_of("dict").unwrap();
-    let bpath = matches.value_of("BOARD").unwrap();
+    #[arg(short, long, default_value = "/usr/share/dict/words")]
+    dict: String,
+
+    #[arg(short, long)]
+    score: bool,
+}
+
+fn main() {
+    let matches = Cli::parse();
+    let dpath = &matches.dict;
+    let bpath = &matches.board;
     let trie = dict(dpath);
 
     let board = {
@@ -91,7 +81,7 @@ fn main() {
     let board = Board::new(board, &trie).unwrap();
     let solutions = solve(&board);
 
-    if matches.is_present("score") {
+    if matches.score {
         let mut tally = 0;
         for s in solutions {
             let score = match s.len() {
