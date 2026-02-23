@@ -87,6 +87,21 @@ and 'burqa'.)  The code has a special case for handling it, which is why
 the 'choose a letter' and 'analyze the path from that letter' is in two
 different code groups.  There is a unit test to assert it works.
 
+## One weird trick
+
+There's an [active boggle-solving community](https://www.danvk.org/2025/04/23/boggle-solved.html)
+that I became aware of late in this project, although at this point it's more about finding the
+highest-scoring boards, not just assessing existing ones. They assume a 4x4 board and write the 16
+characters out in a single line; the highest-scoring board ever found is "plsteaiertnrsges".  If you
+get a board like that, you can convert them to the one used by mine with a simple Perl expression to
+break them up by fours:
+
+```shell
+echo "plsteaiertnrsges" | perl -pe 's/(....)/$1\n/g'
+```
+
+
+
 ## Caveats:
 
 The expected dictionary is the one found in /usr/share/dict/words on GNU
