@@ -108,6 +108,19 @@ A folder in this project contains a [Boggle board
 generator](./boggle-board-maker), in case you feel like making your own.
 Like this one, it's a library with a standalone binary.
 
+## One Weird Trick
+
+Apprently, there's a boggle-solving community, although nowadays they're mostly
+in search of the highest-scoring board. (Confidence is high that they've found
+it.) They stick to a 4x4 board and usually encode them like "perslatgsineters".
+You can convert that to the format used by this solver with:
+
+``` shell
+echo "perslatgsineters" | perl -pe 's/(\w)/\1 /g; s/(........)/\1\n/g'
+```
+
+That puts the spaces in, then splits it on every eighth character.
+
 ## ToDo
 
 The binary is <s>ridiculously</s> now slightly less primitive.  Here's
