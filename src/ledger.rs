@@ -4,6 +4,7 @@
 /// width is less than 64, as it uses a 64-bit value as its backing
 /// store.
 ///
+#[derive(Copy, Clone)]
 pub struct Ledger(isize, isize, u64);
 
 impl Ledger {

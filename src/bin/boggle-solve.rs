@@ -88,8 +88,8 @@ fn main() {
         board
     };
 
-    let board = Board::new(board, &trie).unwrap();
-    let solutions = solve(&board);
+    let board = Board::new(board).unwrap();
+    let solutions = solve(&board, &trie);
 
     if cli.score {
         let mut tally = 0;

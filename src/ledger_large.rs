@@ -5,6 +5,7 @@ use fsbitmap::FSBitmap;
 /// board and a bitmap.  This implementation uses the
 /// Fast-Simple-Bitmap, which is itself backed by a Vec.
 ///
+#[derive(Clone)]
 pub struct Ledger(isize, isize, FSBitmap);
 
 impl Ledger {

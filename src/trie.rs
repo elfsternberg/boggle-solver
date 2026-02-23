@@ -69,6 +69,21 @@ where
         };
     }
 
+    /// Returns true if the current node represents a whole word
+    pub fn is_word(&self) -> bool {
+        self.1
+    }
+
+    /// Returns true if this branch of the trie is exhausted
+    pub fn is_leaf(&self) -> bool {
+        self.0.is_empty()
+    }
+
+    /// From a given node, returns a child node matching the token, if possible
+    pub fn next(&self, c: &C) -> Option<&Self> {
+        self.0.get(&c).map(|n| n.as_ref())
+    }
+
     /// Search for a word or prefix.  The endstate function determines
     /// which.  If the word passed in is exhausted, we return the
     /// endstate.  So for find(), the endstate is "is the terminator
