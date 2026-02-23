@@ -59,17 +59,24 @@ pub(crate) fn solveforpos(
     ledger: Ledger,
     solutions: &mut HashSet<String>,
 ) {
+    let c = board.board[x as usize][y as usize];
     // Get the current position and solve for it. If it's a 'q', treat it as being both 'q' and 'qu'
     // and solve for that.  This handles words like 'burqa' and 'tranq'.
-    let c = board.board[x as usize][y as usize];
-    innersolveforpos(c, board, node, (x, y), buffer, ledger, solutions, false);
-    if c == 'q' {
-        innersolveforpos('u', board, node, (x, y), buffer, ledger, solutions, false);
+    if let Some(node) = node.next(&c) {
+        buffer.push(c);
+        innersolveforpos(board, node, (x, y), buffer, ledger, solutions, false);
+        if c == 'q' {
+            if let Some(node) = node.next(&'u') {
+                buffer.push('u');
+                innersolveforpos(board, node, (x, y), buffer, ledger, solutions, false);
+                buffer.pop();
+            }
+        }
+        buffer.pop();
     }
 }
 
 fn innersolveforpos(
-    c: char,
     board: &Board,
     node: &Node<char>,
     (x, y): (isize, isize),
@@ -82,31 +89,25 @@ fn innersolveforpos(
     if !skip_pos_check && ledger.check(x, y) {
         return;
     }
-    // See if the dictionary has a node for that letter.
-    if let Some(node) = node.next(&c) {
-        // Push the letter into the current solution buffer
-        // If the dictionary says this node represents a word, push a copy of the solution buffer
-        // into the solution set.
-        buffer.push(c);
-        if buffer.len() > 2 && node.is_word() {
-            solutions.insert(buffer.to_string());
-        }
-        buffer.pop();
-        // If the dictionary says there are no possible words that can be formed beyond this
-        // sequence, exit this scan.
-        if node.is_leaf() {
-            return;
-        }
 
-        // sequentially solve for next positions.
-        let ledger = ledger.mark(x, y);
-        for (i, j) in POSITIONS.iter() {
-            let (nx, ny) = (x + i, y + j);
-            if nx >= 0 && nx < board.mx && ny >= 0 && ny < board.my {
-                buffer.push(c);
-                solveforpos(board, node, (nx, ny), buffer, ledger, solutions);
-                buffer.pop();
-            }
+    // Push the letter into the current solution buffer
+    // If the dictionary says this node represents a word, push a copy of the solution buffer
+    // into the solution set.
+    if buffer.len() > 2 && node.is_word() {
+        solutions.insert(buffer.to_string());
+    }
+    // If the dictionary says there are no possible words that can be formed beyond this
+    // sequence, exit this scan.
+    if node.is_leaf() {
+        return;
+    }
+
+    // sequentially solve for next positions.
+    let ledger = ledger.mark(x, y);
+    for (i, j) in POSITIONS.iter() {
+        let (nx, ny) = (x + i, y + j);
+        if nx >= 0 && nx < board.mx && ny >= 0 && ny < board.my {
+            solveforpos(board, node, (nx, ny), buffer, ledger, solutions);
         }
     }
 }
