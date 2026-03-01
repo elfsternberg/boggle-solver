@@ -81,7 +81,7 @@ where
 
     /// From a given node, returns a child node matching the token, if possible
     pub fn next(&self, c: &C) -> Option<&Self> {
-        self.0.get(&c).map(|n| n.as_ref())
+        self.0.get(c).map(|n| n.as_ref())
     }
 
     /// Search for a word or prefix.  The endstate function determines

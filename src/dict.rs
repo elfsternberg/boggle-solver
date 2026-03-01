@@ -15,10 +15,17 @@ pub fn dict(path: &str) -> Node<char> {
     let f = File::open(path).expect("Unable to open file");
     let f = BufReader::new(f);
 
-    for line in f.lines() {
-        if let Ok(line) = line {
-            trie.insert(&mut line.chars());
-        }
+    for line in f.lines().map_while(Result::ok) {
+        trie.insert(&mut line.chars());
+    }
+    trie
+}
+
+/// Given an array of strings load a dictionary into a [trie](./trie.rs)
+pub fn from_list(list: &[&str]) -> Node<char> {
+    let mut trie = Node::new();
+    for line in list {
+        trie.insert(&mut line.chars());
     }
     trie
 }

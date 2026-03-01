@@ -1,11 +1,11 @@
-use fsbitmap::FSBitmap;
+use crate::large_bitmap::FSBitmap;
 
 /// This is a simple ledger for the parts of the board that have been
 /// visited during the search process.  It hosts the dimensions of the
 /// board and a bitmap.  This implementation uses the
 /// Fast-Simple-Bitmap, which is itself backed by a Vec.
 ///
-#[derive(Clone)]
+
 pub struct Ledger(isize, isize, FSBitmap);
 
 impl Ledger {
@@ -14,7 +14,7 @@ impl Ledger {
     }
 
     #[inline]
-    fn next(&self, ledger: FSBitmap) -> Ledger {
+    fn next(&self, ledger: FSBitmap) -> Self {
         Ledger(self.0, self.1, ledger)
     }
 
@@ -39,5 +39,11 @@ impl Ledger {
     /// Checks if the bit is set.
     pub fn check(&self, x: isize, y: isize) -> bool {
         self.2.check(self.point(x, y) as usize)
+    }
+}
+
+impl Clone for Ledger {
+    fn clone(&self) -> Self {
+        Ledger(self.0, self.1, self.2.clone())
     }
 }

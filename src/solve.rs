@@ -8,6 +8,7 @@
 //! Given a board and a dictionary, create a work queue and
 //! solve for each position documented in the queue.
 
+use crate::BoggleJob;
 use crate::Ledger;
 use crate::board::{Board, solveforpos};
 use crate::trie::Node;
@@ -17,13 +18,6 @@ use std::collections::HashSet;
 /// Represents a boggle job. Each die on the board will be scanned sequentially,
 /// but since they don't conflict we can scan the positions for as many threads
 /// as we have available.
-pub struct BoggleJob {
-    x: isize,
-    y: isize,
-    buffer: String,
-    solutions: HashSet<String>,
-}
-
 /// Solve the Boggle board
 ///
 pub fn solve(board: &Board, dictionary: &Node<char>) -> Vec<String> {
@@ -42,8 +36,8 @@ pub fn solve(board: &Board, dictionary: &Node<char>) -> Vec<String> {
         // together afterward.  This is the first step toward
         // map/reducing the solver.
         solveforpos(
-            &board,
-            &dictionary,
+            board,
+            dictionary,
             (job.x, job.y),
             &mut job.buffer,
             Ledger::new(board.mx, board.my),

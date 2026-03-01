@@ -64,11 +64,12 @@ pub(crate) fn solveforpos(
     // and solve for that.  This handles words like 'burqa' and 'tranq'.
     if let Some(node) = node.next(&c) {
         buffer.push(c);
-        innersolveforpos(board, node, (x, y), buffer, ledger, solutions, false);
+        let mut ledger = ledger.clone();
+        innersolveforpos(board, node, (x, y), buffer, &mut ledger, solutions, false);
         if c == 'q' {
             if let Some(node) = node.next(&'u') {
                 buffer.push('u');
-                innersolveforpos(board, node, (x, y), buffer, ledger, solutions, false);
+                innersolveforpos(board, node, (x, y), buffer, &mut ledger, solutions, false);
                 buffer.pop();
             }
         }
@@ -81,7 +82,7 @@ fn innersolveforpos(
     node: &Node<char>,
     (x, y): (isize, isize),
     buffer: &mut String,
-    ledger: Ledger,
+    ledger: &mut Ledger,
     solutions: &mut HashSet<String>,
     skip_pos_check: bool,
 ) {
@@ -107,7 +108,7 @@ fn innersolveforpos(
     for (i, j) in POSITIONS.iter() {
         let (nx, ny) = (x + i, y + j);
         if nx >= 0 && nx < board.mx && ny >= 0 && ny < board.my {
-            solveforpos(board, node, (nx, ny), buffer, ledger, solutions);
+            solveforpos(board, node, (nx, ny), buffer, ledger.clone(), solutions);
         }
     }
 }

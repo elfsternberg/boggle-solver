@@ -21,7 +21,7 @@ pub use board::Board;
 extern crate itertools;
 
 #[cfg(feature = "large_board")]
-extern crate fsbitmap;
+mod large_bitmap;
 #[cfg(feature = "large_board")]
 mod ledger_large;
 #[cfg(feature = "large_board")]
@@ -42,13 +42,24 @@ extern crate num_cpus;
 pub mod solve_threaded;
 #[cfg(feature = "threaded")]
 pub use solve_threaded::solve;
-#[cfg(feature = "threaded")]
-pub use solve_threaded::solve_mt;
 
 #[cfg(not(feature = "threaded"))]
 pub mod solve;
 #[cfg(not(feature = "threaded"))]
 pub use solve::solve;
+
+#[cfg(not(feature = "threaded"))]
+use std::collections::HashSet;
+
+/// Data structure that contains the "stack" onto which words are built,
+/// And the hash set of words that were found during a job.
+#[cfg(not(feature = "threaded"))]
+pub struct BoggleJob {
+    x: isize,
+    y: isize,
+    buffer: String,
+    solutions: HashSet<String>,
+}
 
 #[cfg(test)]
 mod tests {
@@ -57,16 +68,13 @@ mod tests {
     #[cfg(feature = "slow_board")]
     use trie::Node;
 
-    #[cfg(feature = "threaded")]
-    use num_cpus;
-
     #[test]
     fn sample_board() {
         let trie = dict("/usr/share/dict/words");
         let sample = sample_to_vecs(&[&['a', 'n'], &['t', 'd']]);
         let mut expected = result_to_vec(&["ant", "and", "tan", "tad"]);
-        let board = Board::new(sample, &trie).unwrap();
-        let mut result = solve(&board);
+        let board = Board::new(sample).unwrap();
+        let mut result = solve(&board, &trie);
         expected.sort();
         result.sort();
         assert_eq!(result, expected);
@@ -82,7 +90,7 @@ mod tests {
             &['l', 'd', 'h', 'c'],
         ]);
 
-        let board = Board::new(sample, &trie).unwrap();
+        let board = Board::new(sample).unwrap();
         let mut expected = result_to_vec(&[
             "amt", "ape", "apt", "apter", "ate", "cheep", "cheer", "chi", "chin", "chirp", "deed",
             "deem", "deep", "deer", "den", "denier", "dent", "dented", "deter", "eat", "eaten",
@@ -99,7 +107,7 @@ mod tests {
             "team", "teamed", "tee", "teed", "teem", "teen", "teenier", "tel", "ten", "tend",
             "tended", "tern",
         ]);
-        let mut result = solve(&board);
+        let mut result = solve(&board, &trie);
         expected.sort();
         result.sort();
         assert_eq!(result, expected);
@@ -108,62 +116,20 @@ mod tests {
     #[test]
     fn q_board() {
         let trie = dict("/usr/share/dict/words");
+        // The "expected" list here is accurate.  "queue" is indeed on the board: recall that 'q' is always
+        // implicitly both "q" and "qu", so there are technically two "u"s on the board, it's just that
+        // one of them can only ever be used as a letter following 'q', leaving the other one free to
+        // be the latter 'u' in "queue" and "queues".
         let sample = sample_to_vecs(&[&['q', 'u', 'e'], &['e', 'e', 'y'], &['n', 's', 'r']]);
         let mut expected = result_to_vec(&[
-            "eery", "eye", "eyes", "queen", "queens", "queer", "queers", "query", "ques", "rye",
-            "see", "seen", "seer", "sneer", "yen", "yens", "yes", "yrs",
+            "eery", "eye", "eyes", "queen", "queens", "queer", "queers", "query", "ques", "queue",
+            "queues", "rye", "see", "seen", "seer", "sneer", "yen", "yens", "yes", "yrs",
         ]);
-        let board = Board::new(sample, &trie).unwrap();
-        let mut result = solve(&board);
+        let board = Board::new(sample).unwrap();
+        let mut result = solve(&board, &trie);
         expected.sort();
         result.sort();
         assert_eq!(result, expected);
-    }
-
-    // This test is no different from the q_board() test above;
-    // I just wanted a visual affirmation that this test showed
-    // up only when the threaded feature was enabled, in order
-    // to show that the feature was being used as expected.
-    #[cfg(feature = "threaded")]
-    #[test]
-    fn threaded_board() {
-        let trie = dict("/usr/share/dict/words");
-        let sample = sample_to_vecs(&[&['q', 'u', 'e'], &['e', 'e', 'y'], &['n', 's', 'r']]);
-        let mut expected = result_to_vec(&[
-            "eery", "eye", "eyes", "queen", "queens", "queer", "queers", "query", "rye", "see",
-            "seen", "seer", "sneer", "yen", "yens", "yes",
-        ]);
-        let board = Board::new(sample, &trie).unwrap();
-        let mut result = solve_mt(&board, num_cpus::get());
-        expected.sort();
-        result.sort();
-        assert_eq!(result, expected);
-    }
-
-    #[cfg(feature = "large_board")]
-    #[test]
-    fn large_board() {
-        let trie = dict("/usr/share/dict/words");
-        let sample = sample_to_vecs(&[
-            &['d', 'y', 's', 'o', 'i', 'm', 'v', 'n', 'o', 'y', 'c', 'o'],
-            &['b', 'i', 'b', 'e', 'm', 'k', 'q', 'd', 'e', 'i', 'f', 'e'],
-            &['e', 'k', 'l', 'p', 's', 'd', 'l', 'e', 'p', 'g', 'n', 'o'],
-            &['i', 'd', 'e', 'n', 'b', 'a', 'r', 'a', 'k', 'i', 'e', 't'],
-            &['s', 'p', 't', 'r', 'n', 'o', 'a', 'y', 'e', 'a', 'a', 'l'],
-            &['n', 'n', 'w', 'b', 'y', 't', 'o', 'o', 'w', 'n', 'o', 'u'],
-            &['h', 's', 'b', 'd', 'l', 'p', 'q', 'b', 'q', 'u', 'o', 'u'],
-            &['c', 'r', 't', 'a', 'g', 'b', 'l', 'h', 'h', 'a', 'z', 's'],
-            &['d', 'e', 'c', 'w', 'g', 'e', 'a', 'm', 'w', 'd', 'b', 'a'],
-            &['r', 'q', 'm', 's', 'e', 'u', 'e', 'g', 'n', 'o', 't', 'i'],
-            &['i', 'e', 's', 'a', 'a', 'n', 'p', 'v', 'e', 's', 'p', 'u'],
-            &['n', 'p', 't', 'e', 'y', 'd', 'x', 'w', 'l', 'g', 'k', 'c'],
-        ]);
-        let board = Board::new(sample, &trie).unwrap();
-        let mut result = solve(&board);
-        result.sort();
-        // I'm not going to try and keep the entire list here; just the count
-        // is sufficient to ensure the ledger isn't broken for large sets.
-        assert_eq!(result.len(), 980);
     }
 
     #[cfg(feature = "slow_board")]
@@ -180,8 +146,8 @@ mod tests {
             &['e', 'e', 'e', 'e'],
         ]);
 
-        let board = Board::new(sample, &trie).unwrap();
-        let result = solve(&board);
+        let board = Board::new(sample).unwrap();
+        let result = solve(&board, &trie);
         assert_eq!(result.len(), 14);
     }
 
@@ -200,8 +166,8 @@ mod tests {
             &['e', 'e', 'e', 'e'],
         ]);
 
-        let board = Board::new(sample, &trie).unwrap();
-        let result = solve_mt(&board, num_cpus::get());
+        let board = Board::new(sample).unwrap();
+        let result = solve(&board, &trie);
         assert_eq!(result.len(), 14);
     }
 
